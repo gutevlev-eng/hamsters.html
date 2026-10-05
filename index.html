@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10131c">
+<title>Hamster Empire — Business Edition</title>
+<style>
+:root{
+ color-scheme:dark;
+ --bg:#10131c;--surface:#191e2b;--panel:rgba(29,36,52,.94);
+ --input:#131a28;--text:#f5f7ff;--muted:#95a3bb;
+ --border:rgba(190,211,255,.12);--gold:#f4c45a;
+ --blue:#58c9ff;--green:#65dfac;--nav:rgba(16,21,32,.97);
+ --shadow:0 18px 48px #0003;--glow:rgba(58,103,214,.2)
+}
+[data-theme="light"]{
+ color-scheme:light;
+ --bg:#edf1f8;--surface:#fff;--panel:rgba(255,255,255,.96);
+ --input:#eef2f9;--text:#182338;--muted:#687891;
+ --border:rgba(39,64,106,.14);--gold:#bd8410;
+ --blue:#087fc0;--green:#138859;--nav:rgba(255,255,255,.98);
+ --shadow:0 15px 45px #243b6010;--glow:rgba(83,133,233,.13)
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;overscroll-behavior:none}
+body{
+ background:var(--bg);color:var(--text);
+ font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+ transition:background .25s,color .25s
+}
+button,input,select{font:inherit}
+button{
+ color:inherit;border:0;cursor:pointer;touch-action:manipulation;
+ user-select:none;-webkit-user-select:none
+}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{
+ outline:3px solid var(--blue);outline-offset:3px
+}
+.app{
+ width:min(100%,540px);min-height:100dvh;margin:auto;
+ position:relative;isolation:isolate;overflow:hidden;
+ background:radial-gradient(ellipse at 50% 22%,var(--glow),transparent 52%),var(--bg)
+}
+.ambient{position:absolute;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
+.ambient::before,.ambient::after{
+ content:"";position:absolute;width:350px;height:350px;border-radius:50%;
+ filter:blur(65px);opacity:.14;background:#3479ff;left:-190px;top:180px;
+ animation:ambientMove 15s ease-in-out infinite alternate
+}
+.ambient::after{left:auto;right:-210px;top:460px;background:#e7a231;animation-delay:-7s}
+@keyframes ambientMove{to{transform:translate(70px,110px) scale(1.15)}}
+.header{padding:calc(17px + env(safe-area-inset-top)) 18px 10px}
+.profile{display:flex;align-items:center;gap:10px}
+.avatar{
+ flex:none;width:46px;height:46px;border-radius:16px;display:grid;
+ place-items:center;font-size:27px;overflow:hidden;
+ background:linear-gradient(145deg,#f7d581,#9f6925);
+ box-shadow:inset 0 0 0 1px #ffffff45,0 5px 17px #0002
+}
+.avatar img{width:100%;height:100%;object-fit:contain}
+.profile-info{min-width:0;flex:1}
+.profile-name{font-weight:850;font-size:14px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sub{font-size:10px;color:var(--muted);margin-top:4px}
+.icon-button{
+ flex:none;width:38px;height:38px;border-radius:12px;display:grid;
+ place-items:center;background:var(--panel);border:1px solid var(--border);font-size:20px
+}
+.exchange-button{
+ display:flex;align-items:center;gap:6px;padding:9px 8px;
+ border:1px solid var(--border);border-radius:12px;background:var(--panel);font-size:10px
+}
+.exchange-logo{
+ width:21px;height:21px;border-radius:7px;display:grid;
+ place-items:center;font-weight:900;background:#f4c45a;color:#37270c;flex:none
+}
+.rank-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;margin:16px 0 8px;gap:10px}
+.rank-row strong{font-size:12px}
+.progress{height:7px;border-radius:20px;background:var(--border);overflow:hidden}
+.progress i{
+ display:block;height:100%;width:0;border-radius:inherit;
+ background:linear-gradient(90deg,#497aff,#58c9ff,#f4c45a);transition:width .3s linear
+}
+main{padding:9px 16px calc(99px + env(safe-area-inset-bottom))}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--panel);border:1px solid var(--border);padding:12px 5px;border-radius:16px;text-align:center;min-width:0}
+.stat-label{font-size:10px;color:var(--muted);min-height:27px;line-height:1.4}
+.stat-value{font-size:15px;font-weight:850;margin-top:4px}
+.gold{color:var(--gold)}.green{color:var(--green)}.blue{color:var(--blue)}
+.balance{
+ display:flex;align-items:center;justify-content:center;gap:11px;
+ margin:23px 0 6px;font-size:clamp(26px,8vw,42px);font-weight:900;
+ letter-spacing:-1.2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
+.coin{
+ flex:none;width:39px;height:39px;border-radius:50%;display:grid;place-items:center;
+ font-size:23px;color:#936214;background:linear-gradient(140deg,#fff1b6,#fbc94e 55%,#d99720);
+ border:3px solid #ffe38d;box-shadow:inset 0 0 0 2px #dba434,0 5px 20px #f3ba2f25
+}
+.balance-caption{text-align:center;font-size:11px;color:var(--muted)}
+.hero-wrap{width:min(100%,350px);margin:17px auto 11px;position:relative;aspect-ratio:1}
+.hero-wrap::before{
+ content:"";position:absolute;inset:3px;border-radius:50%;border:1px dashed #789cff45;
+ animation:orbit 55s linear infinite;pointer-events:none
+}
+.hero-wrap::after{
+ content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 45px #3977ff18;
+ animation:breathe 4s ease-in-out infinite;pointer-events:none
+}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes breathe{50%{opacity:.4;transform:scale(1.035)}}
+.hero{
+ position:absolute;inset:13px;width:calc(100% - 26px);border-radius:50%;
+ padding:0;overflow:hidden;touch-action:none;user-select:none;
+ background:radial-gradient(ellipse at 50% 87%,#01061280,transparent 44%),
+ radial-gradient(circle at 50% 32%,#405982,#223b65 45%,#111e37 85%);
+ border:4px solid #5875a955;
+ box-shadow:inset 0 0 38px #94bfff14,0 13px 40px #0002,0 0 0 6px #5579bd0c;
+ transition:transform .13s ease-out;will-change:transform
+}
+.hero.cipher{background:radial-gradient(circle at 50% 35%,#683c58,#281a32);border-color:#ca668a70}
+.hero-photo{
+ position:absolute;left:4%;bottom:2%;width:92%;height:92%;object-fit:contain;
+ pointer-events:none;filter:drop-shadow(0 12px 8px #0005);
+ animation:hamsterBreath 4.8s ease-in-out infinite;transform-origin:50% 95%
+}
+@keyframes hamsterBreath{50%{transform:translateY(-3px) scale(1.008)}}
+.photo-button{
+ display:block;margin:0 auto 18px;font-size:11px;padding:8px 13px;border-radius:20px;
+ background:var(--panel);border:1px solid var(--border);color:var(--muted)
+}
+.status-row{display:flex;align-items:center;gap:13px}
+.energy{flex:1;min-width:0}
+.energy-label{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:8px;font-weight:750;font-size:12px}
+.energy .progress i{background:linear-gradient(90deg,#df9a2d,#ffe19b)}
+.boost{padding:13px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border);font-size:12px;font-weight:850}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:17px 0 12px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:19px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.no-shadow{box-shadow:none}
+.section-title{font-size:25px;letter-spacing:-.8px;margin:9px 0;font-weight:900}
+.description{font-size:12px;line-height:1.75;color:var(--muted);margin:0 0 15px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.small{font-size:11px;line-height:1.65;color:var(--muted)}
+.btn{
+ display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:43px;
+ padding:12px 15px;border-radius:13px;background:linear-gradient(135deg,#f9d584,#eeb84d);
+ color:#352509;font-size:12px;font-weight:850;text-decoration:none;transition:transform .15s
+}
+.btn:not(:disabled):active{transform:scale(.97)}
+.btn.secondary{background:var(--input);color:var(--text);border:1px solid var(--border)}
+.btn.success{background:#66dbad;color:#0c3626}
+.btn.danger{background:#e45b6c;color:#fff}
+.btn.wide{width:100%;margin-top:12px}
+.tabs{display:flex;gap:7px;padding:3px 0 13px;overflow-x:auto;scrollbar-width:none}
+.tab{flex:none;white-space:nowrap;border-radius:11px;padding:10px 13px;background:var(--panel);border:1px solid var(--border);font-size:11px}
+.tab.active{background:#f4c45a;color:#352509;font-weight:850;border-color:transparent}
+.search-row{display:flex;gap:8px;margin-bottom:13px}
+.field{width:100%;min-width:0;border:1px solid var(--border);background:var(--input);color:var(--text);border-radius:12px;padding:12px}
+.search-row select{max-width:145px;font-size:11px}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.mine-card{
+ display:flex;flex-direction:column;text-align:left;overflow:hidden;border-radius:17px;
+ border:1px solid var(--border);background:var(--panel);padding:0;min-height:212px;
+ transition:transform .16s,border-color .16s
+}
+.mine-card:hover{border-color:#81aaff40}
+.mine-card:active{transform:scale(.98)}
+.card-art{
+ position:relative;height:67px;display:grid;place-items:center;
+ background:radial-gradient(ellipse at 50% 100%,var(--card-glow,#428bff22),transparent 80%);
+ font-size:35px;border-bottom:1px solid var(--border)
+}
+.card-level{position:absolute;right:8px;top:8px;border-radius:6px;background:var(--input);color:var(--muted);font-size:9px;padding:4px 6px}
+.card-body{padding:11px;flex:1}
+.card-name{font-size:12px;font-weight:850;min-height:30px;line-height:1.4}
+.card-profit{font-size:11px;color:var(--green);margin:7px 0}
+.card-footer{padding:11px;border-top:1px solid var(--border);font-size:12px;font-weight:850;min-height:39px}
+.lock-text{color:var(--muted);font-size:10px;line-height:1.5}
+.combo{display:flex;gap:7px;margin:13px 0}
+.combo-slot{
+ flex:1;min-width:0;background:var(--input);border:1px dashed var(--border);
+ border-radius:12px;padding:10px 4px;text-align:center;display:flex;flex-direction:column;
+ gap:5px;justify-content:center;font-size:10px;min-height:76px
+}
+.combo-slot b{font-size:24px}
+.combo-slot.found{border-color:var(--green);background:#22c55e0c}
+.nav{
+ position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,540px);
+ z-index:30;padding:9px 9px calc(10px + env(safe-area-inset-bottom));
+ background:var(--nav);backdrop-filter:blur(20px);border-top:1px solid var(--border);
+ display:grid;grid-template-columns:repeat(4,1fr);gap:5px
+}
+.nav button{position:relative;background:transparent;color:var(--muted);border-radius:14px;padding:9px 3px;font-size:10px}
+.nav button.active{background:#f4c45a0e;color:var(--gold)}
+.nav-icon{display:block;font-size:23px;margin-bottom:5px}
+.badge{position:absolute;top:5px;right:25%;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.overlay{
+ position:fixed;inset:0;z-index:80;background:#0009;backdrop-filter:blur(8px);
+ display:flex;align-items:flex-end;justify-content:center;padding-top:25px;animation:fadeIn .18s
+}
+.modal{
+ width:min(100%,540px);max-height:92dvh;overflow:auto;
+ padding:18px 19px calc(24px + env(safe-area-inset-bottom));
+ background:var(--surface);border:1px solid var(--border);border-radius:26px 26px 0 0;
+ box-shadow:0 -20px 65px #0004;animation:slideIn .22s ease-out
+}
+.modal-handle{width:40px;height:4px;border-radius:5px;background:var(--muted);opacity:.3;margin:0 auto 18px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.modal-head h2{font-size:21px;margin:0}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:none}}
+.toast{
+ position:fixed;top:calc(18px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+ z-index:120;width:max-content;max-width:min(90vw,440px);background:var(--surface);
+ border:1px solid var(--border);border-radius:14px;padding:13px 17px;font-size:12px;
+ line-height:1.6;text-align:center;box-shadow:var(--shadow);pointer-events:none;animation:fadeIn .15s
+}
+.float-number{
+ position:fixed;z-index:60;pointer-events:none;color:#fff;font-size:31px;font-weight:900;
+ text-shadow:0 2px 4px #0008,0 0 15px #f4c45a60;animation:floatUp .8s ease-out forwards
+}
+@keyframes floatUp{
+ 0%{opacity:1;transform:translate(-50%,-50%) scale(.85)}
+ 20%{transform:translate(-50%,-80%) scale(1.06)}
+ 100%{opacity:0;transform:translate(-50%,-160px) scale(.94)}
+}
+.setting{padding:13px 0;border-bottom:1px solid var(--border)}
+.segment{display:flex;gap:7px;margin-top:10px}
+.segment button{flex:1}
+.notice{padding:12px;margin:12px 0;border-radius:12px;background:#58c9ff0b;border:1px solid #58c9ff22;color:var(--muted);font-size:11px;line-height:1.75}
+.calendar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 0}
+.day{background:var(--input);border:1px solid var(--border);border-radius:11px;text-align:center;padding:9px 2px;font-size:10px}
+.day.current{border-color:var(--gold)}
+.day.done{background:#22c55e0c;border-color:#22c55e40}
+.task{display:flex;align-items:center;gap:11px;padding:13px 0;border-bottom:1px solid var(--border)}
+.task:last-child{border-bottom:0}
+.task-icon{font-size:27px;flex:none}
+.task-info{flex:1;min-width:0}
+.task-title{font-weight:850;font-size:12px;line-height:1.5}
+.separator{height:1px;background:var(--border);margin:14px 0}
+.cipher-box{border:1px solid #bb668655;border-radius:16px;padding:14px;margin-top:16px;text-align:center}
+.cipher-code{color:#ed88ac;font-size:26px;font-weight:900;min-height:35px;letter-spacing:5px}
+.cipher-word{font-size:19px;font-weight:850;letter-spacing:5px;margin:7px 0}
+details{font-size:11px;color:var(--muted);line-height:1.8;margin-top:12px}
+summary{color:var(--text);cursor:pointer}
+.mono{font-family:ui-monospace,Consolas,monospace;word-break:break-all}
+.avatar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:15px 0}
+.avatar-choice{aspect-ratio:1;border-radius:14px;background:var(--input);border:1px solid var(--border);font-size:28px;overflow:hidden}
+.avatar-choice.selected{border-color:var(--gold);background:#f4c45a16}
+.avatar-choice img{width:100%;height:100%;object-fit:contain}
+.offline-photo{width:230px;height:230px;display:block;object-fit:contain;margin:0 auto;filter:drop-shadow(0 12px 13px #0003)}
+.photo-preview{width:100%;height:230px;object-fit:contain;border-radius:15px;background:radial-gradient(circle at 50% 35%,#405982,#162742)}
+.photo-options{display:flex;align-items:center;gap:9px;font-size:12px;margin:12px 0}
+.photo-options input{width:19px;height:19px}
+.puzzle-board{
+ display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);
+ aspect-ratio:1;padding:6px;gap:4px;margin:15px 0;border:2px solid var(--border);
+ border-radius:16px;background:var(--input);position:relative
+}
+.puzzle-cell{background:var(--border);opacity:.3;border-radius:5px;grid-row:var(--r);grid-column:var(--c)}
+.vehicle{
+ z-index:2;display:grid;place-items:center;font-size:20px;border-radius:8px;
+ color:white;border:2px solid #ffffff40;background:linear-gradient(145deg,#32b17c,#116342);
+ box-shadow:0 4px 8px #0002
+}
+.vehicle.red{background:linear-gradient(145deg,#de687d,#92364b)}
+.vehicle.key{background:linear-gradient(145deg,#ffdf8c,#cb922c);color:#523a10}
+.vehicle.selected{outline:3px solid #58c9ff}
+.puzzle-exit{position:absolute;right:-14px;top:35%;font-size:22px;color:var(--gold);z-index:4}
+.arrows{display:flex;justify-content:center;gap:8px}
+.arrows button{min-width:52px;font-size:21px}
+.empty{text-align:center;color:var(--muted);padding:30px 15px;font-size:12px}
+.stat-list{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat-list .panel{margin:0;padding:12px}
+.stat-list strong{display:block;margin-top:5px;font-size:16px}
+.promo-input{text-transform:uppercase;font-weight:800;letter-spacing:1.5px}
+.promo-message{min-height:20px;margin-top:10px;font-size:12px;line-height:1.6}
+.save-panel{margin-top:22px;border-color:#58c9ff30}
+@media(min-width:700px){
+ .app{box-shadow:0 0 90px #0002}
+ .overlay{align-items:center;padding:25px}
+ .modal{border-radius:25px;max-height:89dvh}
+}
+@media(max-height:750px){
+ .hero-wrap{width:min(100%,285px);margin-top:10px}
+ .balance{margin-top:16px}
+}
+@media(max-width:360px){
+ .header{padding-left:12px;padding-right:12px}
+ .exchange-button{font-size:9px;gap:3px;padding:8px 5px}
+ main{padding-left:12px;padding-right:12px}
+ .stat-value{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{
+  animation-duration:.01ms!important;animation-iteration-count:1!important;
+  transition-duration:.01ms!important
+ }
+}
+</style>
+</head>
+<body>
+<div class="app">
+ <div class="ambient" aria-hidden="true"></div>
+ <header id="header" class="header"></header>
+ <main id="main"></main>
+ <nav id="nav" class="nav" aria-label="Навигация"></nav>
+</div>
+<div id="modal-root"></div>
+<div id="toast-root" aria-live="polite"></div>
+<script id="embedded-assets" type="application/json">{"photo":"","avatar":""}</script>
+<script>
+"use strict";
+
+/*
+ Без регистрации и сервера.
+ Общий прогресс хранится по постоянному ключу SAVE_KEY.
+ Доход в час всегда пересчитывается по уровням сохранённых бизнесов.
+ Старые сохранения не удаляются при автоматическом переносе.
+*/
+
+const VERSION=5;
+const SAVE_KEY="hamster-empire-business-local-v1";
+const ASSET_KEY="hamster-empire-business-local-assets-v1";
+const OLD_SAVE_PREFIX="hamster-empire-save-v4:";
+const OLD_ASSET_PREFIX="hamster-empire-assets-v4:";
+const OFFLINE_LIMIT=3600;
+const ENERGY_BASE=1000,ENERGY_STEP=250,ENERGY_REGEN=1.5;
+const PRICE_GROWTH=1.78,PROFIT_GROWTH=1.10,PROFIT_FACTOR=.55;
+const PROMO_REWARD=1000000;
+const DEFAULT_PHOTO="hamster.png";
+const MAX_NUMBER=1e100;
+
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const now=()=>Date.now();
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const finite=(v,f=0)=>{
+ const n=Number(v);
+ return Number.isFinite(n)?n:f;
+};
+const safeNumber=(v,max=MAX_NUMBER)=>clamp(finite(v),0,max);
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
+const FALLBACK_PHOTO="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 300">
+<defs>
+ <radialGradient id="fur" cx=".38" cy=".25" r=".85">
+  <stop stop-color="#edc47c"/><stop offset=".55" stop-color="#bc8240"/>
+  <stop offset="1" stop-color="#815027"/>
+ </radialGradient>
+ <radialGradient id="cream">
+  <stop stop-color="#f9e8bf"/><stop offset="1" stop-color="#d2ac72"/>
+ </radialGradient>
+</defs>
+<ellipse cx="140" cy="279" rx="91" ry="10" fill="#000" opacity=".15"/>
+<ellipse cx="140" cy="185" rx="107" ry="98" fill="url(#fur)"/>
+<circle cx="74" cy="48" r="31" fill="url(#fur)"/>
+<circle cx="206" cy="48" r="31" fill="url(#fur)"/>
+<circle cx="75" cy="48" r="21" fill="#a77660"/>
+<circle cx="205" cy="48" r="21" fill="#a77660"/>
+<path d="M55 106Q55 37 140 34Q225 37 225 106Q238 171 140 180Q42 171 55 106" fill="url(#fur)"/>
+<ellipse cx="140" cy="205" rx="72" ry="67" fill="url(#cream)"/>
+<ellipse cx="100" cy="92" rx="10" ry="13" fill="#18100b"/>
+<ellipse cx="180" cy="92" rx="10" ry="13" fill="#18100b"/>
+<circle cx="97" cy="87" r="3.5" fill="#fff"/>
+<circle cx="177" cy="87" r="3.5" fill="#fff"/>
+<ellipse cx="115" cy="129" rx="37" ry="27" fill="url(#cream)"/>
+<ellipse cx="165" cy="129" rx="37" ry="27" fill="url(#cream)"/>
+<path d="M129 121Q140 113 151 121Q145 135 140 135Q135 135 129 121" fill="#b67d72"/>
+<path d="M140 133v10m0 0q-9 8-15 0m15 0q9 8 15 0" fill="none" stroke="#78503b" stroke-width="2"/>
+<g stroke="#d9c7a0" stroke-width="1.3" opacity=".8">
+ <path d="M112 131L45 119M111 138L36 139M112 145L43 160"/>
+ <path d="M168 131L235 119M169 138L244 139M168 145L237 160"/>
+</g>
+<ellipse cx="98" cy="219" rx="22" ry="34" transform="rotate(-27 98 219)" fill="url(#fur)"/>
+<ellipse cx="182" cy="219" rx="22" ry="34" transform="rotate(27 182 219)" fill="url(#fur)"/>
+<ellipse cx="110" cy="230" rx="14" ry="18" fill="#ddb98e"/>
+<ellipse cx="170" cy="230" rx="14" ry="18" fill="#ddb98e"/>
+<ellipse cx="83" cy="278" rx="26" ry="10" fill="#b88f7a"/>
+<ellipse cx="197" cy="278" rx="26" ry="10" fill="#b88f7a"/>
+</svg>`);
+
+const PROMO_CODES=new Set(`
+BUSINESS COMPANY MARKET MONEY PROFIT SALES CUSTOMER CLIENT PRODUCT SERVICE
+BRAND OFFICE MANAGER EMPLOYEE BOSS TEAM PARTNER INVESTMENT INVESTOR BANK
+LOAN PRICE COST BUDGET INCOME REVENUE EXPENSE TAX TRADE STORE SHOP BUYER
+SELLER DEAL CONTRACT PROJECT PLAN GOAL SUCCESS GROWTH STRATEGY MARKETING
+ADVERTISING PROMOTION CAMPAIGN COMPETITION COMPETITOR DEMAND SUPPLY QUALITY
+VALUE STOCK SHARE COMPANY STARTUP ENTREPRENEUR LEADER LEADERSHIP MANAGEMENT
+FINANCE ACCOUNTING ECONOMY ECONOMIC INDUSTRY FACTORY PRODUCTION DELIVERY ORDER
+PAYMENT CASH CREDIT PROFITABLE RISK RISKY OPPORTUNITY IDEA INNOVATION
+TECHNOLOGY WEBSITE ONLINE DIGITAL EMAIL MEETING PRESENTATION REPORT DATA
+ANALYSIS RESEARCH DEVELOPMENT DEPARTMENT HEADQUARTERS SALARY CAREER JOB WORK
+SKILL EXPERIENCE RESULT TARGET DEADLINE AGREEMENT NEGOTIATION CONSUMER
+BRANCH RETAIL WHOLESALE EXPORT IMPORT GLOBAL
+`.trim().split(/\s+/));
+
+const RANKS=[
+ ["Bronze",0],["Silver",5000],["Gold",25000],["Platinum",100000],
+ ["Diamond",1000000],["Epic",2000000],["Legendary",10000000],
+ ["Master",50000000],["Grandmaster",100000000],["Lord",1000000000],
+ ["Creator",10000000000]
+];
+const RANK_ICONS=["🥉","🥈","🥇","🔷","💎","⚡","🔥","👑","🌟","🏆","✨"];
+const EXCHANGES=["Binance","Bybit","OKX","BingX","HTX","KuCoin"];
+const AVATARS=["🐹","🦊","🐼","🐻","🐱","🐺","🦁","🐯","🦉","🐸","🐨","🐰","🤖","👑","💎"];
+
+const CATEGORIES=[
+ {id:"markets",ru:"Крипторынки",en:"Crypto markets",color:"#498dff25"},
+ {id:"business",ru:"Бизнес",en:"Business",color:"#f4c45a25"},
+ {id:"team",ru:"Команда",en:"Team",color:"#a77aff25"},
+ {id:"tech",ru:"Технологии",en:"Technology",color:"#58c9ff25"},
+ {id:"legal",ru:"Право",en:"Legal",color:"#65dfac25"},
+ {id:"special",ru:"Развитие",en:"Expansion",color:"#f484aa25"}
+];
+
+const CARD_DATA={
+ markets:[
+  ["fan","Фан-токены","Fan tokens","⚽",250,60],
+  ["margin10","Маржинальная торговля ×10","Margin trading ×10","📈",500,110],
+  ["staking","Стейкинг","Staking","💎",800,160],
+  ["meme","Мем-монеты","Meme coins","🐸",1200,230,["fan",2]],
+  ["margin50","Маржинальная торговля ×50","Margin trading ×50","🚀",3500,620,["margin10",3]],
+  ["margin100","Маржинальная торговля ×100","Margin trading ×100","🔥",9500,1400,["margin50",3]],
+  ["spot","Спотовый терминал","Spot terminal","📊",700,140],
+  ["liquidity","Пулы ликвидности","Liquidity pools","💧",4200,680,["staking",3]],
+  ["research","Аналитика активов","Asset research","🔍",1800,320,["spot",2]],
+  ["institutional","Институциональный отдел","Institutional desk","🏦",24000,3400,["research",4]]
+ ],
+ business:[
+  ["coffee","Кофейня","Coffee shop","☕",350,75],
+  ["delivery","Курьерская служба","Courier service","📦",650,125],
+  ["store","Интернет-магазин","Online store","🛒",1100,210],
+  ["studio","Дизайн-студия","Design studio","🖌️",1700,300],
+  ["restaurant","Ресторан","Restaurant","🍽️",4200,640,["coffee",3]],
+  ["logistics","Логистический центр","Logistics hub","🚚",6500,940,["delivery",3]],
+  ["factory","Производственная линия","Production line","🏭",11000,1550,["store",3]],
+  ["estate","Коммерческая недвижимость","Commercial property","🏢",18000,2400,["restaurant",3]],
+  ["hotel","Бутик-отель","Boutique hotel","🏨",27000,3600,["estate",3]],
+  ["holding","Бизнес-холдинг","Business holding","🌐",65000,8000,["factory",4]]
+ ],
+ team:[
+  ["marketing","Маркетинг","Marketing","📣",300,70],
+  ["security","Команда безопасности","Security team","🛡️",600,130],
+  ["ux","UX-дизайн","UX design","🎨",950,190],
+  ["anonymous","Защита конфиденциальности","Privacy protection","🔒",2400,440,["security",3]],
+  ["legalteam","Юридический отдел","Legal team","⚖️",1500,280],
+  ["support","Служба поддержки","Customer support","🎧",800,155],
+  ["hr","HR-отдел","HR department","🧑‍💼",1300,240],
+  ["sales","Отдел продаж","Sales department","🤝",2600,440,["marketing",2]],
+  ["academy","Корпоративная академия","Corporate academy","🎓",7400,1080,["hr",3]],
+  ["executive","Совет директоров","Board of directors","👔",22000,2900,["academy",3]]
+ ],
+ tech:[
+  ["servers","Серверная инфраструктура","Server infrastructure","🖥️",900,175],
+  ["cloud","Облачная платформа","Cloud platform","☁️",2200,380,["servers",2]],
+  ["mobile","Мобильное приложение","Mobile app","📱",1800,315,["ux",2]],
+  ["api","API для партнёров","Partner API","🔌",3600,580,["servers",3]],
+  ["automation","Автоматизация процессов","Process automation","⚙️",4700,720,["cloud",2]],
+  ["ai","AI-аналитика","AI analytics","🧠",7800,1100,["research",3]],
+  ["backup","Резервные системы","Backup systems","💾",3100,500,["security",2]],
+  ["datacenter","Дата-центр","Data center","🏗️",19000,2600,["cloud",4]],
+  ["payments","Платёжная инфраструктура","Payment infrastructure","💳",12000,1700,["api",3]],
+  ["robotics","Роботизация","Robotics","🤖",36000,4600,["automation",4]]
+ ],
+ legal:[
+  ["compliance","Комплаенс","Compliance","📋",1000,185],
+  ["audit","Финансовый аудит","Financial audit","🧾",1800,315,["legalteam",2]],
+  ["uae","Лицензия ОАЭ","UAE license","🏜️",2500,480,["legalteam",2]],
+  ["europe","Лицензия Европы","Europe license","🏛️",6000,900,["uae",2]],
+  ["asia","Лицензия Азии","Asia license","🌏",8000,1150,["europe",2]],
+  ["usa","Лицензия США","USA license","🗽",15000,2100,["asia",3]],
+  ["trademark","Регистрация бренда","Trademark registration","®️",2300,370,["compliance",2]],
+  ["insurance","Страхование бизнеса","Business insurance","☂️",4500,690,["audit",2]],
+  ["standards","Сертификация качества","Quality certification","✅",8200,1140,["compliance",3]],
+  ["patents","Патентный портфель","Patent portfolio","📜",24000,3000,["standards",3]]
+ ],
+ special:[
+  ["event","Событие дня","Daily event","🎪",5000,850,null,true],
+  ["tournament","Турнир трейдеров","Trading tournament","🏆",10000,1600,["marketing",3]],
+  ["collab","Звёздная коллаборация","Star collaboration","🌟",20000,3000,["marketing",5]],
+  ["conference","Бизнес-конференция","Business conference","🎤",6800,1000,["sales",3]],
+  ["franchise","Франчайзинговая сеть","Franchise network","🗺️",15000,2000,["restaurant",3]],
+  ["venture","Венчурный фонд","Venture fund","💼",26000,3400,["audit",3]],
+  ["international","Международный офис","International office","✈️",32000,4000,["europe",3]],
+  ["media","Собственное медиа","Company media","📰",9000,1280,["marketing",3]],
+  ["green","Зелёная энергетика","Green energy","🌱",21000,2750,["factory",3]],
+  ["innovation","Инновационный кампус","Innovation campus","🏙️",80000,9500,["datacenter",4]]
+ ]
+};
+const CARDS=Object.entries(CARD_DATA).flatMap(([cat,rows])=>rows.map(
+ ([id,ru,en,icon,cost,profit,dep,event])=>({id,cat,ru,en,icon,cost,profit,dep,event:!!event})
+));
+const CARD_BY_ID=Object.fromEntries(CARDS.map(c=>[c.id,c]));
+const CHECKIN=[500,1000,2500,5000,15000,25000,100000,500000,1000000,5000000];
+const WORDS=["COIN","TON","MINE","GOLD","BLOCK","TRADE","TOKEN"];
+const MORSE={
+ ".-":"A","-...":"B","-.-.":"C","-..":"D",".":"E","..-.":"F",
+ "--.":"G","....":"H","..":"I",".---":"J","-.-":"K",".-..":"L",
+ "--":"M","-.":"N","---":"O",".--.":"P","--.-":"Q",".-.":"R",
+ "...":"S","-":"T","..-":"U","...-":"V",".--":"W","-..-":"X",
+ "-.--":"Y","--..":"Z"
+};
+const comboDay=(t=now())=>Math.floor((t-12*3600000)/86400000);
+const calendarDay=(t=now())=>Math.floor((t+3*3600000)/86400000);
+const comboResetAt=()=>(comboDay()+1)*86400000+12*3600000;
+const calendarResetAt=()=>(calendarDay()+1)*86400000-3*3600000;
+
+function newState(){
+ return {
+  version:VERSION,language:"ru",theme:"dark",sound:true,nickname:"Hamster CEO",
+  exchange:"Binance",avatar:"photo",balance:0,earned:0,energy:ENERGY_BASE,
+  tapLevel:0,energyLevel:0,cards:{},lastSeen:now(),pendingOffline:0,
+  comboDay:comboDay(),comboFound:[],comboClaimed:false,
+  cipherDay:comboDay(),cipherClaimed:false,
+  boostDay:calendarDay(),boostUsed:0,boostLast:0,
+  checkinLast:null,checkinStreak:0,keys:0,puzzleDay:null,usedPromos:[],
+  stats:{taps:0,spent:0,playSeconds:0}
+ };
+}
+function normalizeState(data){
+ const s=newState();
+ if(!data||typeof data!=="object"||Array.isArray(data))return s;
+ s.language=["ru","en"].includes(data.language)?data.language:"ru";
+ s.theme=["dark","light"].includes(data.theme)?data.theme:"dark";
+ s.sound=typeof data.sound==="boolean"?data.sound:true;
+ s.nickname=String(data.nickname||s.nickname).slice(0,24);
+ s.exchange=EXCHANGES.includes(data.exchange)?data.exchange:"Binance";
+ s.avatar=[...AVATARS,"photo","custom"].includes(data.avatar)?data.avatar:"photo";
+ s.tapLevel=Math.floor(safeNumber(data.tapLevel,100));
+ s.energyLevel=Math.floor(safeNumber(data.energyLevel,100));
+ s.balance=safeNumber(data.balance);
+ s.earned=Math.max(s.balance,safeNumber(data.earned));
+ s.energy=clamp(finite(data.energy,ENERGY_BASE),0,ENERGY_BASE+s.energyLevel*ENERGY_STEP);
+ s.pendingOffline=safeNumber(data.pendingOffline);
+ s.lastSeen=clamp(finite(data.lastSeen,now()),0,now());
+ s.keys=Math.floor(safeNumber(data.keys,1e9));
+ const cards=data.cards&&typeof data.cards==="object"&&!Array.isArray(data.cards)?data.cards:{};
+ for(const c of CARDS){
+  const value=cards[c.id];
+  const level=value&&typeof value==="object"?value.level:value;
+  s.cards[c.id]=Math.floor(safeNumber(level,100));
+ }
+ for(const key of ["comboDay","cipherDay","boostDay"]){
+  if(data[key]!=null&&Number.isFinite(Number(data[key])))s[key]=Math.floor(Number(data[key]));
+ }
+ s.comboFound=Array.isArray(data.comboFound)?
+  [...new Set(data.comboFound.filter(id=>CARD_BY_ID[id]))].slice(0,3):[];
+ s.comboClaimed=!!data.comboClaimed;
+ s.cipherClaimed=!!data.cipherClaimed;
+ s.boostUsed=Math.floor(safeNumber(data.boostUsed,6));
+ s.boostLast=clamp(finite(data.boostLast),0,now());
+ s.checkinLast=data.checkinLast==null?null:Math.floor(finite(data.checkinLast));
+ s.checkinStreak=Math.floor(safeNumber(data.checkinStreak,1e9));
+ s.puzzleDay=data.puzzleDay==null?null:Math.floor(finite(data.puzzleDay));
+ s.usedPromos=Array.isArray(data.usedPromos)?[...new Set(
+  data.usedPromos.filter(v=>typeof v==="string").map(v=>v.trim().toUpperCase())
+   .filter(v=>PROMO_CODES.has(v))
+ )]:[];
+ const stats=data.stats&&typeof data.stats==="object"?data.stats:{};
+ for(const key of Object.keys(s.stats))s.stats[key]=safeNumber(stats[key]);
+ return s;
+}
+
+let state=newState(),assets={photo:"",avatar:""};
+let active=false,tab="home",mineCategory="markets",mineSearch="",mineSort="default";
+let modalName="",modalData=null,previousFocus=null;
+let displayedBalance=0,lastFrame=performance.now(),lastHUD=0,lastRenderedRank=0;
+let hourlyProfit=0,soundContext=null,toastTimer=null,tiltTimer=null;
+let cipherMode=false,cipherSymbols="",cipherLetters="",cipherTimer=null;
+let statTapTimes=[],lastAcceptedTap=-Infinity,puzzle=null;
+let photoBusy=false,settleClock=now(),storageWarning=false,saveOK=true,lastSavedAt=0;
+let defaultPhotoFailed=false,defaultPhotoData="",migrationMessage="";
+let dataEpoch=0;
+const activePointers=new Map();
+
+const T=(ru,en)=>state.language==="ru"?ru:en;
+const trName=o=>state.language==="ru"?o.ru:o.en;
+
+function fmt(n){
+ return Math.floor(finite(n)).toLocaleString(state.language==="ru"?"ru-RU":"en-US")
+  .replace(/\u00a0/g," ");
+}
+function compact(n){
+ n=Math.max(0,finite(n));
+ if(n<1000)return fmt(n);
+ const pair=[[1e15,"Q"],[1e12,"T"],[1e9,"B"],[1e6,"M"],[1e3,"K"]].find(([v])=>n>=v);
+ return (n/pair[0]).toFixed(n/pair[0]<100?1:0).replace(/\.0$/,"")+pair[1];
+}
+function timeText(ms){
+ const n=Math.max(0,Math.ceil(finite(ms)/1000)),h=Math.floor(n/3600);
+ const m=Math.floor(n%3600/60),s=n%60;
+ return h?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:
+  `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+function setText(selector,text){
+ const element=$(selector);
+ if(element&&element.textContent!==text)element.textContent=text;
+}
+function toast(message){
+ clearTimeout(toastTimer);
+ $("#toast-root").innerHTML=`<div class="toast">${esc(message)}</div>`;
+ toastTimer=setTimeout(()=>$("#toast-root").innerHTML="",4000);
+}
+
+function parseJSON(raw){
+ try{return raw?JSON.parse(raw):null}catch{return null}
+}
+function validSave(data){
+ return !!data&&typeof data==="object"&&!Array.isArray(data)&&
+  typeof data.balance==="number"&&Number.isFinite(data.balance)&&
+  !!data.cards&&typeof data.cards==="object"&&!Array.isArray(data.cards);
+}
+function validImageData(v){
+ return typeof v==="string"&&v.length<5500000&&
+  /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=\s]+$/.test(v);
+}
+function normalizeAssets(data){
+ return {
+  photo:validImageData(data?.photo)?data.photo:"",
+  avatar:validImageData(data?.avatar)?data.avatar:""
+ };
+}
+function embeddedAssets(){
+ return normalizeAssets(parseJSON($("#embedded-assets").textContent));
+}
+function mergeAssets(primary,fallback){
+ const a=normalizeAssets(primary),b=normalizeAssets(fallback);
+ return {photo:a.photo||b.photo,avatar:a.avatar||b.avatar};
+}
+
+/* Общий прогресс загружается до первого сохранения. */
+function loadProgress(){
+ const embedded=embeddedAssets();
+ assets=embedded;
+ try{
+  const commonRaw=localStorage.getItem(SAVE_KEY);
+  const common=parseJSON(commonRaw);
+  if(validSave(common)){
+   state=normalizeState(common);
+   assets=mergeAssets(parseJSON(localStorage.getItem(ASSET_KEY)),embedded);
+   return;
+  }
+
+  if(commonRaw!==null){
+   try{
+    localStorage.setItem(SAVE_KEY+":damaged-backup:"+now(),commonRaw);
+   }catch{}
+  }
+
+  const candidates=[];
+  for(let i=0;i<localStorage.length;i++){
+   const key=localStorage.key(i);
+   if(!key||!key.startsWith(OLD_SAVE_PREFIX))continue;
+   const data=parseJSON(localStorage.getItem(key));
+   if(validSave(data))candidates.push({key,data});
+  }
+  candidates.sort((a,b)=>finite(b.data.lastSeen)-finite(a.data.lastSeen));
+
+  if(candidates.length){
+   const selected=candidates[0];
+   state=normalizeState(selected.data);
+   const suffix=selected.key.slice(OLD_SAVE_PREFIX.length);
+   assets=mergeAssets(
+    parseJSON(localStorage.getItem(OLD_ASSET_PREFIX+suffix)),embedded
+   );
+   migrationMessage="account";
+   return;
+  }
+
+  const oldKeys=[
+   "hamster-empire-business-v4",
+   "hamster-empire-business-v3",
+   "hamster-empire-browser-v1"
+  ];
+  for(const key of oldKeys){
+   const data=parseJSON(localStorage.getItem(key));
+   if(!validSave(data))continue;
+   state=normalizeState(data);
+   assets=mergeAssets(data.assets,embedded);
+   migrationMessage="legacy";
+   return;
+  }
+ }catch{
+  saveOK=false;
+ }
+ state=newState();
+}
+
+/* Доход не зависит от временного кеша или аккаунта. */
+const maxEnergy=()=>ENERGY_BASE+state.energyLevel*ENERGY_STEP;
+const tapValue=()=>1+state.tapLevel;
+function cardIncome(c){
+ const level=state.cards[c.id]||0;
+ return c.profit*PROFIT_FACTOR*(Math.pow(PROFIT_GROWTH,level)-1)/(PROFIT_GROWTH-1);
+}
+function recalculateProfit(){
+ hourlyProfit=CARDS.reduce((sum,c)=>sum+cardIncome(c),0);
+ if(!Number.isFinite(hourlyProfit)||hourlyProfit<0)hourlyProfit=0;
+ return hourlyProfit;
+}
+const profitPerHour=()=>hourlyProfit;
+const cardIncrease=c=>c.profit*PROFIT_FACTOR*Math.pow(PROFIT_GROWTH,state.cards[c.id]||0);
+const cardPrice=c=>Math.ceil(c.cost*Math.pow(PRICE_GROWTH,state.cards[c.id]||0));
+const boostPrice=type=>Math.ceil((type==="tap"?500:1000)*
+ Math.pow(1.75,type==="tap"?state.tapLevel:state.energyLevel));
+
+function rankIndex(){
+ let rank=0;
+ for(let i=0;i<RANKS.length;i++)if(state.earned>=RANKS[i][1])rank=i;
+ return rank;
+}
+function credit(amount){
+ if(!Number.isFinite(amount)||amount<=0)return;
+ state.balance=Math.min(MAX_NUMBER,state.balance+amount);
+ state.earned=Math.min(MAX_NUMBER,state.earned+amount);
+}
+function spend(amount){
+ if(!Number.isFinite(amount)||amount<0||state.balance+1e-7<amount)return false;
+ state.balance=Math.max(0,state.balance-amount);
+ state.stats.spent=Math.min(MAX_NUMBER,state.stats.spent+amount);
+ return true;
+}
+function settle(offline=false){
+ const t=now(),seconds=Math.max(0,(t-settleClock)/1000);
+ settleClock=t;state.lastSeen=t;
+ if(!seconds)return;
+ const duration=offline?Math.min(seconds,OFFLINE_LIMIT):seconds;
+ const income=profitPerHour()*duration/3600;
+ if(offline)state.pendingOffline=Math.min(MAX_NUMBER,state.pendingOffline+income);
+ else credit(income);
+ state.energy=clamp(state.energy+seconds*ENERGY_REGEN,0,maxEnergy());
+ if(!offline)state.stats.playSeconds=Math.min(
+  MAX_NUMBER,state.stats.playSeconds+Math.min(seconds,60)
+ );
+}
+function writeSave(){
+ state.version=VERSION;
+ /* Снимок дохода для диагностики. Источник истины — state.cards. */
+ const snapshot={...state,hourlyProfit:profitPerHour()};
+ try{
+  localStorage.setItem(SAVE_KEY,JSON.stringify(snapshot));
+  lastSavedAt=now();saveOK=true;storageWarning=false;
+  return true;
+ }catch{
+  saveOK=false;
+  if(!storageWarning){
+   storageWarning=true;
+   toast(T(
+    "Браузер не сохраняет прогресс. Проверь разрешения и свободное место. Сделай экспорт JSON.",
+    "Browser storage is unavailable. Check permissions and free space. Export JSON as a backup."
+   ));
+  }
+  return false;
+ }
+}
+function save(){
+ if(active)settle(false);
+ return writeSave();
+}
+function saveAssets(){
+ try{
+  localStorage.setItem(ASSET_KEY,JSON.stringify(assets));
+  return true;
+ }catch{
+  toast(T(
+   "Фото не сохранилось в браузере. Попробуй изображение меньшего размера.",
+   "Image could not be saved. Try a smaller image."
+  ));
+  return false;
+ }
+}
+
+function dailyCombo(){
+ const pool=["fan","margin10","staking","marketing","security","ux","legalteam"];
+ const d=((comboDay()%pool.length)+pool.length)%pool.length;
+ return [pool[d],pool[(d+2)%pool.length],pool[(d+4)%pool.length]];
+}
+const dailyWord=()=>WORDS[((comboDay()%WORDS.length)+WORDS.length)%WORDS.length];
+function clearCipher(){
+ clearTimeout(cipherTimer);
+ cipherSymbols="";cipherLetters="";activePointers.clear();
+}
+function rollDays(){
+ let changed=false;
+ const day=comboDay();
+ if(state.comboDay!==day){
+  state.comboDay=day;state.comboFound=[];state.comboClaimed=false;changed=true;
+ }
+ if(state.cipherDay!==day){
+  state.cipherDay=day;state.cipherClaimed=false;
+  cipherMode=false;clearCipher();changed=true;
+ }
+ if(state.boostDay!==calendarDay()){
+  state.boostDay=calendarDay();state.boostUsed=0;changed=true;
+ }
+ state.comboFound=state.comboFound.filter(id=>dailyCombo().includes(id));
+ return changed;
+}
+
+function sound(kind="tap"){
+ if(!state.sound||!active)return;
+ try{
+  const Audio=window.AudioContext||window.webkitAudioContext;
+  if(!Audio)return;
+  if(!soundContext)soundContext=new Audio();
+  if(soundContext.state==="suspended")soundContext.resume().catch(()=>{});
+  const start=soundContext.currentTime;
+  const frequencies=kind==="reward"?[523,659,784,1047]:
+   kind==="buy"?[440,660]:kind==="error"?[160]:[740];
+  frequencies.forEach((frequency,i)=>{
+   const oscillator=soundContext.createOscillator(),gain=soundContext.createGain();
+   const t=start+i*.075;
+   oscillator.connect(gain);gain.connect(soundContext.destination);
+   oscillator.type=kind==="tap"?"sine":"triangle";
+   oscillator.frequency.setValueAtTime(frequency,t);
+   if(kind==="tap")oscillator.frequency.exponentialRampToValueAtTime(380,t+.065);
+   gain.gain.setValueAtTime(.0001,t);
+   gain.gain.exponentialRampToValueAtTime(kind==="tap"?.07:.1,t+.008);
+   gain.gain.exponentialRampToValueAtTime(.0001,t+.12);
+   oscillator.start(t);oscillator.stop(t+.14);
+  });
+ }catch{}
+}
+function haptic(){try{navigator.vibrate?.(8)}catch{}}
+function floatNumber(x,y,value){
+ if($$(".float-number").length>=30)return;
+ const element=document.createElement("div");
+ element.className="float-number";element.textContent=value;
+ element.style.left=x+"px";element.style.top=y+"px";
+ document.body.appendChild(element);
+ element.addEventListener("animationend",()=>element.remove(),{once:true});
+ setTimeout(()=>element.remove(),1000);
+}
+
+function photoSource(){
+ return assets.photo||defaultPhotoData||(defaultPhotoFailed?FALLBACK_PHOTO:DEFAULT_PHOTO);
+}
+function photoHTML(className="",alt=null){
+ return `<img class="${className}" src="${esc(photoSource())}" data-hamster
+  alt="${esc(alt||T("Хомяк","Hamster"))}" draggable="false">`;
+}
+document.addEventListener("error",event=>{
+ const image=event.target;
+ if(!(image instanceof HTMLImageElement)||!image.hasAttribute("data-hamster"))return;
+ if(image.src===FALLBACK_PHOTO)return;
+ if(!assets.photo&&!defaultPhotoData)defaultPhotoFailed=true;
+ image.src=FALLBACK_PHOTO;
+},true);
+function avatarHTML(){
+ if(state.avatar==="photo")return photoHTML("",T("Аватар","Avatar"));
+ if(state.avatar==="custom"&&assets.avatar){
+  return `<img src="${esc(assets.avatar)}" alt="${T("Аватар","Avatar")}">`;
+ }
+ return esc(AVATARS.includes(state.avatar)?state.avatar:"🐹");
+}
+
+async function processImage(file,removeWhite=false,avatar=false){
+ if(!file||!file.type.startsWith("image/")){
+  throw new Error(T("Выбери изображение.","Choose an image."));
+ }
+ if(file.size>15*1024*1024)throw new Error(T("Максимум 15 МБ.","Maximum 15 MB."));
+ const url=URL.createObjectURL(file);
+ try{
+  const image=await new Promise((resolve,reject)=>{
+   const img=new Image();
+   img.onload=()=>resolve(img);
+   img.onerror=()=>reject(new Error(T("Не удалось открыть фото.","Could not open image.")));
+   img.src=url;
+  });
+  if(!image.naturalWidth||!image.naturalHeight)throw new Error(T("Пустое изображение.","Empty image."));
+  const canvas=document.createElement("canvas");
+  const scale=Math.min(1,720/Math.max(image.naturalWidth,image.naturalHeight));
+  const w=avatar?160:Math.max(1,Math.round(image.naturalWidth*scale));
+  const h=avatar?160:Math.max(1,Math.round(image.naturalHeight*scale));
+  canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext("2d",{willReadFrequently:true});
+  if(!ctx)throw new Error("Canvas unavailable");
+  if(avatar){
+   const side=Math.min(image.naturalWidth,image.naturalHeight);
+   ctx.drawImage(image,(image.naturalWidth-side)/2,(image.naturalHeight-side)/2,
+    side,side,0,0,w,h);
+  }else ctx.drawImage(image,0,0,w,h);
+
+  if(removeWhite&&!avatar){
+   const pixels=ctx.getImageData(0,0,w,h),data=pixels.data,count=w*h;
+   const marked=new Uint8Array(count),queue=new Int32Array(count);
+   let head=0,tail=0;
+   const isBackground=i=>{
+    const offset=i*4;
+    if(data[offset+3]<15)return true;
+    const min=Math.min(data[offset],data[offset+1],data[offset+2]);
+    const max=Math.max(data[offset],data[offset+1],data[offset+2]);
+    return min>=214&&max-min<=29;
+   };
+   const add=i=>{
+    if(i<0||i>=count||marked[i]||!isBackground(i))return;
+    marked[i]=1;queue[tail++]=i;
+   };
+   for(let x=0;x<w;x++){add(x);add((h-1)*w+x)}
+   for(let y=0;y<h;y++){add(y*w);add(y*w+w-1)}
+   while(head<tail){
+    const i=queue[head++],x=i%w;
+    if(x>0)add(i-1);
+    if(x<w-1)add(i+1);
+    if(i>=w)add(i-w);
+    if(i<count-w)add(i+w);
+   }
+   for(let i=0;i<count;i++)if(marked[i])data[i*4+3]=0;
+   for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
+    const i=y*w+x;
+    if(marked[i])continue;
+    let near=false;
+    for(let dy=-1;dy<=1&&!near;dy++)for(let dx=-1;dx<=1;dx++){
+     if(marked[i+dy*w+dx]){near=true;break}
+    }
+    if(!near)continue;
+    const offset=i*4;
+    const min=Math.min(data[offset],data[offset+1],data[offset+2]);
+    const max=Math.max(data[offset],data[offset+1],data[offset+2]);
+    if(min>160&&max-min<80){
+     const alpha=clamp((255-min)/85,.08,1);
+     data[offset+3]=Math.round(data[offset+3]*alpha);
+     if(alpha<1)for(let c=0;c<3;c++){
+      data[offset+c]=clamp(Math.round((data[offset+c]-255*(1-alpha))/alpha),0,255);
+     }
+    }
+   }
+   ctx.putImageData(pixels,0,0);
+   let minX=w,minY=h,maxX=-1,maxY=-1;
+   for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+    if(data[(y*w+x)*4+3]>40){
+     minX=Math.min(minX,x);minY=Math.min(minY,y);
+     maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);
+    }
+   }
+   if(maxX>=minX&&maxY>=minY){
+    const out=document.createElement("canvas"),padding=12;
+    out.width=maxX-minX+1+padding*2;out.height=maxY-minY+1+padding*2;
+    const outCtx=out.getContext("2d");
+    if(!outCtx)throw new Error("Canvas unavailable");
+    outCtx.drawImage(canvas,minX,minY,maxX-minX+1,maxY-minY+1,
+     padding,padding,maxX-minX+1,maxY-minY+1);
+    return out.toDataURL("image/png");
+   }
+  }
+  return canvas.toDataURL("image/png");
+ }finally{URL.revokeObjectURL(url)}
+}
+async function uploadImage(avatar=false){
+ if(photoBusy)return;
+ const file=$(avatar?"#avatar-file":"#photo-file")?.files?.[0];
+ if(!file){toast(T("Сначала выбери изображение.","Choose an image first."));return}
+ const removeWhite=!avatar&&!!$("#photo-remove-white")?.checked;
+ const epoch=dataEpoch;
+ photoBusy=true;renderModal();
+ try{
+  const data=await processImage(file,removeWhite,avatar);
+  if(epoch!==dataEpoch)return;
+  if(avatar){assets.avatar=data;state.avatar="custom"}
+  else assets.photo=data;
+  const persisted=saveAssets();
+  save();render();
+  if(persisted)toast(T("Изображение сохранено.","Image saved."));
+ }catch(error){
+  if(epoch===dataEpoch)toast(error.message||T("Ошибка обработки.","Processing failed."));
+ }finally{
+  photoBusy=false;
+  if(["avatar","photo"].includes(modalName))renderModal();
+ }
+}
+async function embedDefaultPhoto(){
+ if(assets.photo)return assets.photo;
+ if(defaultPhotoData)return defaultPhotoData;
+ const image=await new Promise((resolve,reject)=>{
+  const img=new Image();
+  img.onload=()=>resolve(img);
+  img.onerror=()=>reject(new Error(T(
+   "Не найден hamster.png. Загрузи фото через настройки.",
+   "hamster.png not found. Upload a photo in settings."
+  )));
+  img.src=DEFAULT_PHOTO;
+ });
+ const canvas=document.createElement("canvas");
+ canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+ const ctx=canvas.getContext("2d");
+ if(!ctx)throw new Error("Canvas unavailable");
+ ctx.drawImage(image,0,0);
+ try{
+  defaultPhotoData=canvas.toDataURL("image/png");
+  return defaultPhotoData;
+ }catch{
+  throw new Error(T(
+   "Браузер блокирует встраивание локального фото. Загрузи его через настройки.",
+   "The browser blocked embedding a local image. Upload it in settings."
+  ));
+ }
+}
+
+function applySettings(){
+ document.documentElement.lang=state.language;
+ document.documentElement.dataset.theme=state.theme;
+ $('meta[name="theme-color"]').content=state.theme==="dark"?"#10131c":"#edf1f8";
+ $("#nav").setAttribute("aria-label",T("Навигация","Navigation"));
+}
+function renderHeader(){
+ $("#header").innerHTML=`
+ <div class="profile">
+  <button class="avatar" data-action="avatar" aria-label="${T("Изменить аватар","Change avatar")}">${avatarHTML()}</button>
+  <div class="profile-info">
+   <div class="profile-name">${esc(state.nickname)}</div>
+   <div class="sub">${T("CEO · бизнес и криптобиржа","CEO · business & crypto exchange")}</div>
+  </div>
+  <button class="exchange-button" data-action="exchange">
+   <span class="exchange-logo">${state.exchange[0]}</span>${esc(state.exchange)} ⌄
+  </button>
+  <button class="icon-button" data-action="settings" aria-label="${T("Настройки","Settings")}">⚙</button>
+ </div>
+ <div class="rank-row"><strong id="rank-name"></strong><span id="rank-level"></span></div>
+ <div class="progress"><i id="rank-progress"></i></div>`;
+}
+function renderNav(){
+ const items=[
+  ["home","🐹",T("Главная","Home")],["mine","💼",T("Бизнес","Business")],
+  ["earn","🎁",T("Награды","Rewards")],["empire","📊",T("Империя","Empire")]
+ ];
+ $("#nav").innerHTML=items.map(([id,icon,label])=>`
+ <button data-action="tab" data-id="${id}" class="${tab===id?"active":""}"
+  ${tab===id?'aria-current="page"':""}>
+  <span class="nav-icon">${icon}</span>${label}
+  ${id==="earn"&&state.checkinLast!==calendarDay()?'<i class="badge"></i>':""}
+ </button>`).join("");
+}
+function appendSavePanel(){
+ $("#main").insertAdjacentHTML("beforeend",`
+ <section class="panel save-panel no-shadow">
+  <div class="row">
+   <strong style="font-size:12px">💾 ${T("Локальный прогресс","Local progress")}</strong>
+   <span class="small" id="save-status"></span>
+  </div>
+  <p class="small">${T(
+   "Без регистрации. Бизнесы, доход, монеты и улучшения сохраняются автоматически в этом браузере.",
+   "No registration. Businesses, profit, coins and upgrades are saved automatically in this browser."
+  )}</p>
+  <div class="segment">
+   <button class="btn secondary" data-action="save-now">${T("Сохранить","Save now")}</button>
+   <button class="btn secondary" data-action="export">${T("Экспорт JSON","Export JSON")}</button>
+  </div>
+ </section>`);
+}
+function render(){
+ applySettings();renderHeader();renderNav();
+ if(tab==="home")renderHome();
+ else if(tab==="mine")renderMine();
+ else if(tab==="earn")renderEarn();
+ else renderEmpire();
+ appendSavePanel();updateHUD();
+}
+function renderHome(){
+ $("#main").innerHTML=`
+ <div class="stats">
+  <button class="stat" data-action="stat-tap" title="${T("Три нажатия открывают шифр","Triple tap opens cipher")}">
+   <div class="stat-label gold">${T("Монет за нажатие","Coins per tap")}</div>
+   <div class="stat-value gold" id="tap-value"></div>
+  </button>
+  <div class="stat">
+   <div class="stat-label blue">${T("До следующей лиги","Until next league")}</div>
+   <div class="stat-value" id="to-next"></div>
+  </div>
+  <div class="stat">
+   <div class="stat-label green">${T("Доход в час","Profit per hour")}</div>
+   <div class="stat-value green" id="pph"></div>
+  </div>
+ </div>
+ <div class="balance"><span class="coin">$</span><span id="balance-number">${fmt(displayedBalance)}</span></div>
+ <div class="balance-caption">${T("Строй бизнес. Развивай биржу. Создавай империю.","Build businesses. Grow your exchange. Create an empire.")}</div>
+ <div class="hero-wrap">
+  <button id="hero" class="hero ${cipherMode?"cipher":""}" aria-label="${T("Нажать на хомяка","Tap hamster")}">${photoHTML("hero-photo")}</button>
+ </div>
+ <button class="photo-button" data-action="photo">${T("Изменить фото хомяка","Change hamster photo")}</button>
+ <div class="status-row">
+  <div class="energy">
+   <div class="energy-label">
+    <span>⚡ <span id="energy-number"></span></span>
+    <span class="small">+${T("1,5/с","1.5/s")}</span>
+   </div>
+   <div class="progress"><i id="energy-progress"></i></div>
+  </div>
+  <button class="boost" data-action="boosts">🚀 ${T("Бусты","Boosts")}</button>
+ </div>
+ ${cipherMode?`
+ <div class="cipher-box">
+  <div class="small">${T("Короткое нажатие — точка. Удержание >300 мс — тире.","Short press: dot. Hold >300 ms: dash.")}</div>
+  <div id="cipher-code" class="cipher-code"></div>
+  <div id="cipher-word" class="cipher-word"></div>
+  <div class="small">${T("Пауза 0,9 с завершает букву.","A 0.9-second pause completes a letter.")}</div>
+  <div class="segment">
+   <button class="btn secondary" data-action="cipher-help">${T("Подсказка","Hint")}</button>
+   <button class="btn secondary" data-action="cipher-clear">${T("Очистить","Clear")}</button>
+   <button class="btn secondary" data-action="cipher-toggle">${T("Выйти","Exit")}</button>
+  </div>
+ </div>`:`
+ <div class="quick-actions">
+  <button class="btn secondary" data-action="cipher-toggle">🔴 ${T("Шифр дня","Daily cipher")}</button>
+  <button class="btn secondary" data-action="puzzle">🔑 ${T("Мини-игра","Mini-game")}</button>
+ </div>`}
+ <div class="panel no-shadow" style="margin-top:14px">
+  <div class="row">
+   <div>
+    <strong style="font-size:13px">🧩 ${T("Комбо дня","Daily combo")}</strong>
+    <div class="small">${T("Награда","Reward")}: <span class="gold">5 000 000</span></div>
+   </div>
+   <button class="btn secondary" data-action="combo">${T("Открыть","Open")}</button>
+  </div>
+ </div>
+ <button class="btn secondary wide" data-action="tab" data-id="empire">🎟️ ${T("Промокоды","Promo codes")}</button>
+ <div class="small" style="text-align:center;margin-top:12px">${T("Офлайн: до 1 часа · 60 бизнес-направлений","Offline: up to 1 hour · 60 business directions")}</div>`;
+ bindHero();updateCipherUI();
+}
+function lockReason(c){
+ if(c.dep){
+  const [id,level]=c.dep;
+  if((state.cards[id]||0)<level)return `${trName(CARD_BY_ID[id])} · ${T("ур.","lvl")} ${level}`;
+ }
+ if(c.event){
+  const hour=new Date().getUTCHours();
+  if(hour>=3&&hour<9)return T(
+   "Доступно с 12:00 до 06:00 МСК",
+   "Available 12:00–06:00 Moscow time"
+  );
+ }
+ return "";
+}
+function comboHTML(){
+ return `<div class="panel no-shadow">
+ <div class="row">
+  <strong style="font-size:14px">🧩 ${T("Комбо дня","Daily combo")}</strong>
+  <span class="small" data-countdown="${comboResetAt()}"></span>
+ </div>
+ <div class="combo">${dailyCombo().map(id=>{
+  const c=CARD_BY_ID[id],found=state.comboFound.includes(id);
+  return `<div class="combo-slot ${found?"found":""}">
+   <b>${found?c.icon:"?"}</b>
+   <span>${found?esc(trName(c)):T("Скрытый бизнес","Hidden business")}</span>${found?"✓":""}
+  </div>`;
+ }).join("")}</div>
+ <div class="row">
+  <strong class="gold">🪙 5 000 000</strong>
+  <button class="btn ${state.comboFound.length===3&&!state.comboClaimed?"success":"secondary"}"
+   data-action="combo-claim" ${state.comboFound.length!==3||state.comboClaimed?"disabled":""}>
+   ${state.comboClaimed?T("Получено","Claimed"):T("Забрать","Claim")}
+  </button>
+ </div>
+ <details><summary>${T("Как собрать комбо?","How to complete combo?")}</summary>
+  ${T("Купи или улучши три направления дня. Сброс в 15:00 МСК. Подсказка:","Buy or upgrade today's three businesses. Resets at 15:00 Moscow time. Hint:")}
+  <b>${dailyCombo().map(id=>esc(trName(CARD_BY_ID[id]))).join(" · ")}</b>
+ </details></div>`;
+}
+function renderMine(){
+ $("#main").innerHTML=`
+ <h1 class="section-title">${T("Твоя бизнес-империя","Your business empire")}</h1>
+ <p class="description">${T("60 направлений: от кофейни до собственной криптобиржи. Офлайн-доход — максимум за 1 час.","60 directions, from a coffee shop to a crypto exchange. Offline earnings are capped at 1 hour.")}</p>
+ <div class="panel no-shadow row">
+  <span class="small">${T("Баланс","Balance")}: <strong class="gold" data-balance></strong></span>
+  <span class="small"><strong class="green" data-pph></strong>/${T("ч","h")}</span>
+ </div>
+ ${comboHTML()}
+ <div class="tabs">
+  <button class="tab ${mineCategory==="all"?"active":""}" data-action="category" data-id="all">${T("Все · 60","All · 60")}</button>
+  ${CATEGORIES.map(c=>`<button class="tab ${mineCategory===c.id?"active":""}" data-action="category" data-id="${c.id}">${trName(c)}</button>`).join("")}
+ </div>
+ <div class="search-row">
+  <input id="mine-search" class="field" value="${esc(mineSearch)}"
+   placeholder="${T("Поиск бизнеса…","Search businesses…")}" aria-label="${T("Поиск","Search")}">
+  <select id="mine-sort" class="field" aria-label="${T("Сортировка","Sort")}">
+   ${[
+    ["default",T("По порядку","Default order")],["price",T("По цене","By price")],
+    ["profit",T("По доходу","By profit")],["roi",T("По окупаемости","By payback")]
+   ].map(([id,name])=>`<option value="${id}" ${mineSort===id?"selected":""}>${name}</option>`).join("")}
+  </select>
+ </div><div id="business-list"></div>`;
+ renderBusinessList();
+}
+function renderBusinessList(){
+ const query=mineSearch.trim().toLocaleLowerCase();
+ const list=CARDS.filter(c=>(mineCategory==="all"||c.cat===mineCategory)&&
+  (!query||(c.ru+" "+c.en).toLocaleLowerCase().includes(query)));
+ if(mineSort==="price")list.sort((a,b)=>cardPrice(a)-cardPrice(b));
+ if(mineSort==="profit")list.sort((a,b)=>cardIncrease(b)-cardIncrease(a));
+ if(mineSort==="roi")list.sort((a,b)=>cardPrice(a)/cardIncrease(a)-cardPrice(b)/cardIncrease(b));
+ const root=$("#business-list");
+ if(!root)return;
+ if(!list.length){
+  root.innerHTML=`<div class="empty">${T("Ничего не найдено.","Nothing found.")}</div>`;
+  return;
+ }
+ root.innerHTML=`<div class="card-grid">${list.map(c=>{
+  const reason=lockReason(c),level=state.cards[c.id]||0;
+  const category=CATEGORIES.find(item=>item.id===c.cat);
+  return `<button class="mine-card" data-action="card" data-id="${c.id}">
+   <div class="card-art" style="--card-glow:${category.color}">
+    ${c.icon}<span class="card-level">${T("Ур.","Lvl")} ${level}</span>
+   </div>
+   <div class="card-body">
+    <div class="card-name">${esc(trName(c))}</div>
+    <div class="card-profit">+${compact(cardIncrease(c))}/${T("час","hour")}</div>
+    <div class="small">${T("Текущий доход","Current profit")}: ${compact(cardIncome(c))}</div>
+   </div>
+   <div class="card-footer">${level>=100?"MAX":reason?
+    `<span class="lock-text">🔒 ${esc(reason)}</span>`:"🪙 "+compact(cardPrice(c))}</div>
+  </button>`;
+ }).join("")}</div>`;
+}
+function checkinInfo(){
+ const today=calendarDay();
+ const streak=state.checkinLast===today||state.checkinLast===today-1?state.checkinStreak:0;
+ const claimed=state.checkinLast===today;
+ return {today,streak,claimed,next:claimed?((Math.max(1,streak)-1)%10)+1:streak%10+1};
+}
+function renderEarn(){
+ const info=checkinInfo();
+ $("#main").innerHTML=`
+ <h1 class="section-title">${T("Ежедневные награды","Daily rewards")}</h1>
+ <p class="description">${T("Награды за вход, шифр, комбо и мини-игру. Без заданий соцсетей и демо-видео.","Check-in, cipher, combo and mini-game rewards. No social media or demo video tasks.")}</p>
+ <div class="panel">
+  <div class="row">
+   <strong style="font-size:14px">🗓 ${T("Ежедневный вход","Daily check-in")}</strong>
+   <span class="small">${T("Серия","Streak")}: ${info.streak}</span>
+  </div>
+  <div class="calendar">${CHECKIN.map((reward,i)=>{
+   const done=info.claimed?i<info.next:i<info.next-1;
+   return `<div class="day ${done?"done":""} ${info.next===i+1?"current":""}">
+    ${T("День","Day")} ${i+1}<br><span style="font-size:20px">${done?"✓":"🪙"}</span>
+    <br><b class="gold">${compact(reward)}</b>
+   </div>`;
+  }).join("")}</div>
+  <button class="btn wide" data-action="checkin" ${info.claimed?"disabled":""}>
+   ${info.claimed?T("Сегодня уже получено","Already claimed today"):
+    T("Забрать","Claim")+" +"+fmt(CHECKIN[info.next-1])}
+  </button>
+  <div class="small" style="margin-top:9px">${T("Пропуск дня сбрасывает серию. После 10-го дня цикл повторяется. Дни считаются по МСК.","Missing a day resets your streak. The cycle repeats after day 10. Moscow time.")}</div>
+ </div>
+ <div class="panel">
+  <div class="row"><strong>🔴 ${T("Шифр дня","Daily cipher")}</strong><strong class="gold">+1 000 000</strong></div>
+  <button class="btn secondary wide" data-action="cipher-toggle" ${state.cipherClaimed?"disabled":""}>
+   ${state.cipherClaimed?T("Сегодня разгадан","Solved today"):T("Разгадать шифр","Solve cipher")}
+  </button>
+ </div>
+ ${comboHTML()}
+ <div class="panel">
+  <div class="row"><strong>🔑 ${T("Мини-игра","Mini-game")}</strong><span class="gold">+1 ${T("ключ","key")}</span></div>
+  <button class="btn secondary wide" data-action="puzzle" ${state.puzzleDay===comboDay()?"disabled":""}>
+   ${state.puzzleDay===comboDay()?T("Ключ получен","Key claimed"):T("Играть","Play")}
+  </button>
+ </div>`;
+}
+function renderEmpire(){
+ const owned=CARDS.filter(c=>(state.cards[c.id]||0)>0).length;
+ const levels=CARDS.reduce((sum,c)=>sum+(state.cards[c.id]||0),0);
+ $("#main").innerHTML=`
+ <h1 class="section-title">${T("Обзор империи","Empire overview")}</h1>
+ <p class="description">${T("Промокоды и твой игровой прогресс. Монеты игровые: реальной торговли и вывода денег нет.","Promo codes and your progress. Coins are fictional: no real trading or cash withdrawals.")}</p>
+ <div class="panel">
+  <div class="row"><strong>🎟️ ${T("Промокоды","Promo codes")}</strong><span class="small">${state.usedPromos.length}/${PROMO_CODES.size}</span></div>
+  <p class="small">${T("Каждый действующий промокод даёт","Each valid promo code grants")}
+   <strong class="gold">+1 000 000</strong>
+   ${T("монет один раз. Регистр букв не важен.","coins once. Codes are case-insensitive.")}
+  </p>
+  <label for="promo-input" class="small">${T("Введи промокод","Enter a promo code")}</label>
+  <input id="promo-input" class="field promo-input" maxlength="40" autocomplete="off"
+   autocapitalize="characters" spellcheck="false" style="margin-top:8px">
+  <button class="btn wide" data-action="promo-activate">🎁 ${T("Активировать · +1 000 000","Activate · +1,000,000")}</button>
+  <div id="promo-message" class="promo-message" role="status"></div>
+  ${state.usedPromos.length?`<details>
+   <summary>${T("Использованные промокоды","Used promo codes")}</summary>
+   <div class="mono" style="margin-top:8px">${state.usedPromos.map(esc).join(" · ")}</div>
+  </details>`:""}
+ </div>
+ <div class="stat-list" style="margin-bottom:13px">
+  ${[
+   [T("Открыто бизнесов","Businesses owned"),`${owned}/60`],
+   [T("Всего уровней","Total upgrades"),fmt(levels)],
+   [T("Всего заработано","Total earned"),compact(state.earned)],
+   [T("Доход в час","Hourly profit"),compact(profitPerHour())]
+  ].map(([label,value])=>`<div class="panel no-shadow"><span class="small">${label}</span><strong class="gold">${value}</strong></div>`).join("")}
+ </div>
+ <div class="panel">
+  ${[
+   ["🔑",T("Игровые ключи","Game keys"),fmt(state.keys)],
+   ["🎟️",T("Активировано промокодов","Promo codes used"),fmt(state.usedPromos.length)],
+   ["👆",T("Нажатий","Taps"),fmt(state.stats.taps)],
+   ["🏆",T("Текущая лига","Current league"),RANKS[rankIndex()][0]],
+   ["⏱️",T("Активное время","Active time"),timeText(state.stats.playSeconds*1000)]
+  ].map(([icon,label,value])=>`
+   <div class="task"><span class="task-icon">${icon}</span>
+    <div class="task-info"><div class="task-title">${label}</div></div>
+    <strong class="gold" style="font-size:13px">${value}</strong>
+   </div>`).join("")}
+ </div>`;
+}
+function updateHUD(){
+ const rank=rankIndex(),next=RANKS[rank+1];
+ const progress=next?(state.earned-RANKS[rank][1])/(next[1]-RANKS[rank][1])*100:100;
+ setText("#rank-name",`${RANK_ICONS[rank]} ${RANKS[rank][0]}`);
+ setText("#rank-level",`${T("Уровень","Level")} ${rank+1}/11`);
+ if($("#rank-progress"))$("#rank-progress").style.width=clamp(progress,0,100)+"%";
+ setText("#tap-value","🪙 +"+fmt(tapValue()));
+ setText("#to-next",next?compact(Math.max(0,next[1]-state.earned)):"MAX");
+ setText("#pph","+"+compact(profitPerHour()));
+ setText("#energy-number",`${fmt(state.energy)} / ${fmt(maxEnergy())}`);
+ if($("#energy-progress"))$("#energy-progress").style.width=state.energy/maxEnergy()*100+"%";
+ $$("[data-balance]").forEach(e=>e.textContent=fmt(state.balance));
+ $$("[data-pph]").forEach(e=>e.textContent=compact(profitPerHour()));
+ $$("[data-countdown]").forEach(e=>e.textContent=timeText(Number(e.dataset.countdown)-now()));
+ if(puzzle)setText("#puzzle-timer",timeText(puzzle.deadline-now()));
+ setText("#boost-cooldown",timeText(state.boostLast+3600000-now()));
+ setText("#save-status",saveOK?T("Автосохранение ✓","Autosave ✓"):T("Не сохранено","Not saved"));
+ const status=$("#save-status");
+ if(status)status.style.color=saveOK?"var(--green)":"#ef7a8b";
+}
+function promoMessage(text,ok=false){
+ const element=$("#promo-message");
+ if(element){element.textContent=text;element.style.color=ok?"var(--green)":"#ef7a8b"}
+}
+function activatePromo(){
+ const code=($("#promo-input")?.value||"").trim().toUpperCase();
+ if(!code){promoMessage(T("Введи промокод.","Enter a promo code."));sound("error");return}
+ if(!PROMO_CODES.has(code)){promoMessage(T("Такого промокода нет.","Promo code not found."));sound("error");return}
+ if(state.usedPromos.includes(code)){
+  promoMessage(T("Этот промокод уже использован.","This promo code has already been used."));
+  sound("error");return;
+ }
+ settle(false);state.usedPromos.push(code);credit(PROMO_REWARD);
+ save();sound("reward");haptic();checkRank();render();
+ promoMessage(T("Промокод активирован! +1 000 000 монет.","Promo code activated! +1,000,000 coins."),true);
+ $("#promo-input")?.focus({preventScroll:true});
+}
+
+function bindHero(){
+ const hero=$("#hero");
+ if(!hero)return;
+ activePointers.clear();
+ hero.addEventListener("pointerdown",event=>{
+  if(modalName||!active||(event.pointerType==="mouse"&&event.button!==0))return;
+  event.preventDefault();
+  if(activePointers.size>=4||(cipherMode&&activePointers.size))return;
+  const entry={start:performance.now(),x:event.clientX,y:event.clientY};
+  activePointers.set(event.pointerId,entry);
+  try{hero.setPointerCapture(event.pointerId)}catch{}
+  const rect=hero.getBoundingClientRect();
+  const x=(event.clientX-rect.left)/rect.width-.5,y=(event.clientY-rect.top)/rect.height-.5;
+  hero.style.transform=`perspective(600px) rotateX(${-y*12}deg) rotateY(${x*12}deg) scale(.967)`;
+  clearTimeout(tiltTimer);tiltTimer=setTimeout(()=>hero.style.transform="",135);
+  if(cipherMode)clearTimeout(cipherTimer);
+  else doTap(entry.x,entry.y);
+ });
+ hero.addEventListener("pointerup",event=>{
+  const entry=activePointers.get(event.pointerId);
+  if(!entry)return;
+  activePointers.delete(event.pointerId);
+  if(cipherMode)addCipherSymbol(performance.now()-entry.start>300?"-":".",entry);
+ });
+ hero.addEventListener("pointercancel",event=>{
+  activePointers.delete(event.pointerId);hero.style.transform="";
+ });
+ hero.addEventListener("lostpointercapture",event=>activePointers.delete(event.pointerId));
+ hero.addEventListener("keydown",event=>{
+  if(!["Space","Enter"].includes(event.code)||modalName||!active)return;
+  event.preventDefault();
+  if(event.repeat)return;
+  const rect=hero.getBoundingClientRect();
+  const entry={start:performance.now(),x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+  if(cipherMode){
+   if(activePointers.size)return;
+   activePointers.set("keyboard",entry);clearTimeout(cipherTimer);
+  }else doTap(entry.x,entry.y);
+ });
+ hero.addEventListener("keyup",event=>{
+  if(!["Space","Enter"].includes(event.code))return;
+  event.preventDefault();
+  const entry=activePointers.get("keyboard");
+  if(!entry)return;
+  activePointers.delete("keyboard");
+  if(cipherMode)addCipherSymbol(performance.now()-entry.start>300?"-":".",entry);
+ });
+ hero.addEventListener("blur",()=>activePointers.delete("keyboard"));
+}
+function doTap(x,y){
+ if(!active)return;
+ settle(false);
+ const t=performance.now();
+ if(t-lastAcceptedTap<4)return;
+ lastAcceptedTap=t;
+ const gain=tapValue();
+ if(state.energy+1e-8<gain){
+  sound("error");toast(T("Не хватает энергии. Подожди или используй буст.","Not enough energy. Wait or use a boost."));return;
+ }
+ state.energy=Math.max(0,state.energy-gain);
+ credit(gain);state.stats.taps++;
+ sound();haptic();floatNumber(x,y,"+"+fmt(gain));checkRank();updateHUD();
+}
+function addCipherSymbol(symbol,entry){
+ clearTimeout(cipherTimer);cipherSymbols+=symbol;sound();haptic();
+ floatNumber(entry.x,entry.y,symbol==="."?"•":"—");
+ if(cipherSymbols.length>4){
+  cipherSymbols="";sound("error");
+  toast(T("В букве не больше четырёх сигналов.","A letter has at most four signals."));
+  updateCipherUI();return;
+ }
+ updateCipherUI();cipherTimer=setTimeout(finishCipherLetter,900);
+}
+function updateCipherUI(){
+ setText("#cipher-code",cipherSymbols.replace(/\./g,"•").replace(/-/g,"—")||" ");
+ setText("#cipher-word",cipherLetters||"_");
+}
+function finishCipherLetter(){
+ if(!cipherMode||!active)return;
+ rollDays();
+ if(!cipherMode)return;
+ const letter=MORSE[cipherSymbols];cipherSymbols="";
+ if(!letter){
+  sound("error");toast(T("Неизвестный сигнал. Повтори букву.","Unknown signal. Repeat the letter."));
+  updateCipherUI();return;
+ }
+ cipherLetters+=letter;
+ if(!dailyWord().startsWith(cipherLetters)){
+  sound("error");toast(T("Неверная последовательность. Начни заново.","Incorrect sequence. Start again."));
+  cipherLetters="";updateCipherUI();return;
+ }
+ updateCipherUI();
+ if(cipherLetters===dailyWord()){
+  if(!state.cipherClaimed){
+   settle(false);state.cipherClaimed=true;credit(1000000);
+   save();sound("reward");toast(T("Шифр разгадан! +1 000 000","Cipher solved! +1,000,000"));
+  }
+  cipherMode=false;clearCipher();render();
+ }
+}
+function toggleCipher(){
+ rollDays();
+ if(state.cipherClaimed&&!cipherMode){
+  toast(T("Сегодня шифр уже разгадан.","Today's cipher is already solved."));return;
+ }
+ cipherMode=!cipherMode;clearCipher();tab="home";render();
+}
+
+function openModal(name,data=null){
+ if(!modalName)previousFocus=document.activeElement;
+ if(modalName==="puzzle"&&name!=="puzzle"&&puzzle&&!puzzle.finished)puzzle.finished=true;
+ activePointers.clear();clearTimeout(cipherTimer);cipherSymbols="";updateCipherUI();
+ modalName=name;modalData=data;renderModal();
+ requestAnimationFrame(()=>$(".modal [data-action='close']")?.focus({preventScroll:true}));
+}
+function closeModal(){
+ if(modalName==="puzzle"&&puzzle&&!puzzle.finished)puzzle.finished=true;
+ modalName="";modalData=null;$("#modal-root").innerHTML="";
+ document.body.style.overflow="";
+ if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
+ previousFocus=null;
+}
+function renderModal(){
+ if(!modalName)return;
+ let title="",content="";
+
+ if(modalName==="settings"){
+  title=T("Настройки","Settings");
+  content=`
+  <div class="setting"><strong>${T("Язык","Language")}</strong><div class="segment">
+   <button class="btn ${state.language==="ru"?"":"secondary"}" data-action="language" data-id="ru">Русский</button>
+   <button class="btn ${state.language==="en"?"":"secondary"}" data-action="language" data-id="en">English</button>
+  </div></div>
+  <div class="setting"><strong>${T("Тема","Theme")}</strong><div class="segment">
+   <button class="btn ${state.theme==="dark"?"":"secondary"}" data-action="theme" data-id="dark">🌙 ${T("Тёмная","Dark")}</button>
+   <button class="btn ${state.theme==="light"?"":"secondary"}" data-action="theme" data-id="light">☀️ ${T("Светлая","Light")}</button>
+  </div></div>
+  <div class="setting row"><strong>${T("Звук","Sound")}</strong>
+   <button class="btn secondary" data-action="sound">${state.sound?T("Включён","On"):T("Выключен","Off")}</button>
+  </div>
+  <div class="setting"><strong>${T("Имя игрока","Player name")}</strong>
+   <input id="nickname-input" class="field" maxlength="24" value="${esc(state.nickname)}" style="margin-top:10px">
+   <button class="btn secondary wide" data-action="nickname-save">${T("Сохранить имя","Save name")}</button>
+  </div>
+  <div class="setting"><strong>${T("Персонализация","Personalization")}</strong><div class="segment">
+   <button class="btn secondary" data-action="avatar">${T("Аватар","Avatar")}</button>
+   <button class="btn secondary" data-action="photo">${T("Фото хомяка","Hamster photo")}</button>
+  </div></div>
+  <div class="setting"><strong>${T("Статистика","Statistics")}</strong>
+   <div class="small" style="margin-top:9px">
+    ${T("Всего заработано","Total earned")}: ${fmt(state.earned)}<br>
+    ${T("Всего потрачено","Total spent")}: ${fmt(state.stats.spent)}<br>
+    ${T("Доход в час","Hourly profit")}: ${fmt(profitPerHour())}<br>
+    ${T("Нажатий","Taps")}: ${fmt(state.stats.taps)}<br>
+    ${T("Активное время","Active time")}: ${timeText(state.stats.playSeconds*1000)}<br>
+    ${T("Промокодов использовано","Promo codes used")}: ${state.usedPromos.length}/${PROMO_CODES.size}<br>
+    ${T("Ключей","Keys")}: ${fmt(state.keys)}
+   </div>
+  </div>
+  <div class="notice">${T(
+   "Прогресс общий и сохраняется автоматически. Доход восстанавливается по уровням бизнесов. Очистка данных браузера удалит сохранение — для резервной копии используй JSON.",
+   "Progress is shared locally and saved automatically. Profit is restored from business levels. Clearing browser data removes the save — use JSON backups."
+  )}</div>
+  <div class="segment">
+   <button class="btn secondary" data-action="export">${T("Экспорт JSON","Export JSON")}</button>
+   <button class="btn secondary" data-action="import">${T("Импорт JSON","Import JSON")}</button>
+  </div>
+  <button class="btn secondary wide" data-action="save-now">${T("Сохранить сейчас","Save now")}</button>
+  <button class="btn secondary wide" data-action="export-html">${T("Скачать HTML с фото","Download HTML with photo")}</button>
+  <button class="btn danger wide" data-action="reset-confirm">${T("Сбросить прогресс","Reset progress")}</button>`;
+ }
+
+ if(modalName==="avatar"){
+  title=T("Твой аватар","Your avatar");
+  content=`
+  <p class="description">${T("Выбери значок, фото хомяка или своё изображение.","Choose an icon, the hamster photo or your own image.")}</p>
+  <div class="avatar-grid">
+   <button class="avatar-choice ${state.avatar==="photo"?"selected":""}" data-action="avatar-select" data-id="photo" aria-label="${T("Фото хомяка","Hamster photo")}">${photoHTML()}</button>
+   ${AVATARS.map(a=>`<button class="avatar-choice ${state.avatar===a?"selected":""}" data-action="avatar-select" data-id="${a}" aria-label="${a}">${a}</button>`).join("")}
+   ${assets.avatar?`<button class="avatar-choice ${state.avatar==="custom"?"selected":""}" data-action="avatar-select" data-id="custom"><img src="${esc(assets.avatar)}" alt="${T("Свой аватар","Custom avatar")}"></button>`:""}
+  </div>
+  <label class="small" for="avatar-file">${T("Собственное изображение","Custom image")}</label>
+  <input id="avatar-file" type="file" accept="image/*" class="field" style="margin-top:8px">
+  <button class="btn wide" data-action="avatar-upload" ${photoBusy?"disabled":""}>
+   ${photoBusy?T("Обрабатываю…","Processing…"):T("Загрузить аватар","Upload avatar")}
+  </button>`;
+ }
+
+ if(modalName==="photo"){
+  title=T("Фото хомяка","Hamster photo");
+  content=`
+  ${photoHTML("photo-preview")}
+  <p class="small">${T(
+   "По умолчанию используется hamster.png рядом с HTML. Загрузи фото здесь, чтобы сохранить его в браузере. Если фон уже прозрачный, не включай удаление белого.",
+   "The default image is hamster.png beside the HTML. Upload a photo here to save it in the browser. Do not remove white if the background is already transparent."
+  )}</p>
+  ${defaultPhotoFailed&&!assets.photo?`<div class="notice">${T("hamster.png не найден. Показана резервная иллюстрация.","hamster.png was not found. A fallback illustration is shown.")}</div>`:""}
+  <input id="photo-file" type="file" accept="image/*" class="field">
+  <label class="photo-options">
+   <input id="photo-remove-white" type="checkbox">
+   <span>${T("Удалить белый фон, если он есть","Remove white background, if present")}</span>
+  </label>
+  <button class="btn wide" data-action="photo-upload" ${photoBusy?"disabled":""}>
+   ${photoBusy?T("Обрабатываю…","Processing…"):T("Обработать и сохранить","Process and save")}
+  </button>
+  <button class="btn secondary wide" data-action="export-html">${T("Скачать HTML с фото","Download HTML with photo")}</button>
+  ${assets.photo?`<button class="btn secondary wide" data-action="photo-remove">${T("Вернуть базовое фото","Restore default photo")}</button>`:""}
+  <div class="notice">${T("Фото используется на главной, в аватаре и в окне офлайн-дохода.","The photo appears on the home screen, as an avatar and in the offline dialog.")}</div>`;
+ }
+
+ if(modalName==="exchange"){
+  title=T("Выбрать биржу","Choose exchange");
+  content=`<p class="small">${T("Косметический выбор. Реальной торговли нет.","Cosmetic choice. No real trading.")}</p>`+
+   EXCHANGES.map(name=>`<button class="btn secondary wide" data-action="exchange-select" data-id="${name}">
+    <span class="exchange-logo">${name[0]}</span>${name}${state.exchange===name?" ✓":""}
+   </button>`).join("");
+ }
+
+ if(modalName==="boosts"){
+  title=T("Ускорители","Boosts");
+  const ready=state.boostUsed<6&&now()-state.boostLast>=3600000;
+  content=`
+  <div class="panel no-shadow">
+   <div class="row"><strong>⚡ ${T("Полная энергия","Full energy")}</strong><span class="gold">${6-state.boostUsed}/6</span></div>
+   <p class="small">${T("Бесплатно до 6 раз в сутки. Перезарядка — 60 минут.","Free up to 6 times daily. Cooldown: 60 minutes.")}</p>
+   ${!ready&&state.boostUsed<6?`<div class="small">${T("Перезарядка","Cooldown")}: <span id="boost-cooldown"></span></div>`:""}
+   ${state.boostUsed>=6?`<div class="small">${T("Сброс через","Reset in")} <span data-countdown="${calendarResetAt()}"></span></div>`:""}
+   <button class="btn wide" data-action="full-energy" ${ready?"":"disabled"}>${T("Восстановить энергию","Restore energy")}</button>
+  </div>
+  ${[
+   ["tap","👆",T("Мультитап","Multitap"),T("+1 монета за нажатие на уровне","+1 coin per tap per level"),state.tapLevel],
+   ["energy","🔋",T("Лимит энергии","Energy limit"),T("+250 максимальной энергии на уровне","+250 maximum energy per level"),state.energyLevel]
+  ].map(([id,icon,name,description,level])=>`
+   <div class="panel no-shadow">
+    <div class="row"><strong>${icon} ${name}</strong><span class="small">${T("Ур.","Lvl")} ${level}</span></div>
+    <p class="small">${description}</p>
+    <button class="btn wide" data-action="boost-buy" data-id="${id}" ${level>=100?"disabled":""}>
+     ${level>=100?"MAX":"🪙 "+fmt(boostPrice(id))}
+    </button>
+   </div>`).join("")}
+  <div class="small">${T("Базовая энергия 1000, регенерация 1,5/с. Нажатие расходует столько энергии, сколько приносит монет.","Base energy 1000, recovery 1.5/s. Taps consume as much energy as they earn coins.")}</div>`;
+ }
+
+ if(modalName==="combo"){
+  title=T("Комбо дня","Daily combo");content=comboHTML();
+ }
+
+ if(modalName==="cipher-help"){
+  title=T("Шифр дня","Daily cipher");
+  content=`
+  <div class="notice">${T("Слово дня","Today's word")}: <strong class="gold">${dailyWord()}</strong></div>
+  <p class="small">${T("Короткое нажатие — точка. Удержание >300 мс — тире. Пауза 0,9 с завершает букву. Энергия не расходуется.","Short press: dot. Hold >300 ms: dash. A 0.9-second pause completes a letter. No energy is consumed.")}</p>
+  <div class="panel no-shadow">${[...dailyWord()].map(letter=>{
+   const code=Object.keys(MORSE).find(key=>MORSE[key]===letter);
+   return `<div class="row" style="padding:8px 0"><strong>${letter}</strong>
+    <strong class="gold mono" style="font-size:22px">${code.replace(/\./g,"•").replace(/-/g,"—")}</strong></div>`;
+  }).join("")}</div>
+  <details><summary>${T("Весь алфавит","Full alphabet")}</summary>
+   ${Object.entries(MORSE).sort((a,b)=>a[1].localeCompare(b[1])).map(([code,letter])=>
+    `${letter}: ${code.replace(/\./g,"•").replace(/-/g,"—")}`).join(" · ")}
+  </details>`;
+ }
+
+ if(modalName==="offline"){
+  title=T("Империя работала без тебя","Your empire kept working");
+  content=`
+  ${photoHTML("offline-photo")}
+  <p class="description" style="text-align:center">${T("За каждый период отсутствия начисляется доход максимум за 1 час.","Each absence earns income for up to 1 hour.")}</p>
+  <div class="balance" style="font-size:30px"><span class="coin">$</span>+${fmt(state.pendingOffline)}</div>
+  <button class="btn wide" data-action="offline-claim">${T("Забрать доход","Claim earnings")}</button>
+  <p class="small" style="text-align:center">${T("Награда сохраняется отдельно от баланса до получения.","The reward is saved separately until claimed.")}</p>`;
+ }
+
+ if(modalName==="card"){
+  const c=CARD_BY_ID[modalData];
+  if(!c){closeModal();return}
+  const reason=lockReason(c),level=state.cards[c.id]||0;
+  title=trName(c);
+  content=`
+  <div style="font-size:72px;text-align:center;padding:15px">${c.icon}</div>
+  <div class="panel no-shadow">${[
+   [T("Уровень","Level"),`${level} → ${Math.min(100,level+1)}`],
+   [T("Текущий доход в час","Current hourly profit"),compact(cardIncome(c))],
+   [T("Прирост дохода в час","Additional hourly profit"),"+"+compact(cardIncrease(c))],
+   [T("Стоимость","Cost"),"🪙 "+compact(cardPrice(c))],
+   [T("Окупаемость улучшения","Upgrade payback"),compact(cardPrice(c)/cardIncrease(c))+" "+T("ч","h")]
+  ].map(([label,value],i)=>`${i?'<div class="separator"></div>':""}
+   <div class="row"><span class="small">${label}</span>
+    <strong class="${i===2?"green":i===3?"gold":""}">${value}</strong>
+   </div>`).join("")}</div>
+  ${reason?`<div class="notice">🔒 ${T("Сначала","First")}: ${esc(reason)}</div>`:""}
+  <button class="btn wide" data-action="card-buy" data-id="${c.id}" ${reason||level>=100?"disabled":""}>
+   ${level>=100?"MAX":T("Улучшить бизнес","Upgrade business")}
+  </button>
+  <div class="small" style="margin-top:12px">${T("Цена ×1,78 за уровень. Следующий прирост дохода ×1,10. Максимум 100 уровней.","Price grows ×1.78 per level. The next profit increment grows ×1.10. Maximum 100 levels.")}</div>`;
+ }
+
+ if(modalName==="reset"){
+  title=T("Сбросить прогресс?","Reset progress?");
+  content=`
+  <p class="description">${T(
+   "Баланс, бизнесы, улучшения, ключи и использованные промокоды будут сброшены. Фото, имя, язык и тема сохранятся. Сначала рекомендуется экспортировать JSON.",
+   "Balance, businesses, upgrades, keys and used promo codes will be reset. Images, name, language and theme remain. Export a JSON backup first."
+  )}</p>
+  <button class="btn danger wide" data-action="reset">${T("Да, сбросить","Yes, reset")}</button>
+  <button class="btn secondary wide" data-action="close">${T("Отмена","Cancel")}</button>`;
+ }
+
+ if(modalName==="import"){
+  title=T("Импорт сохранения","Import save");
+  content=`
+  <p class="small">${T(
+   "Поддерживаются игровые сохранения v1–v5. Текущий прогресс будет заменён. Доход пересчитается по уровням бизнесов. Старые аккаунты и задания соцсетей не импортируются.",
+   "Supports game saves v1–v5. Current progress will be replaced. Profit is recalculated from business levels. Old accounts and social tasks are not imported."
+  )}</p>
+  <input id="import-file" type="file" accept=".json,application/json" class="field">
+  <button class="btn wide" data-action="import-apply">${T("Загрузить сохранение","Load save")}</button>`;
+ }
+
+ if(modalName==="puzzle"){
+  title=T("Ключ от империи","Key to the empire");content=puzzleHTML();
+ }
+
+ $("#modal-root").innerHTML=`
+ <div id="overlay" class="overlay">
+  <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+   <div class="modal-handle"></div>
+   <div class="modal-head"><h2 id="modal-title">${esc(title)}</h2>
+    <button class="icon-button" data-action="close" aria-label="${T("Закрыть","Close")}">×</button>
+   </div>${content}
+  </section>
+ </div>`;
+ document.body.style.overflow="hidden";updateHUD();
+}
+
+function startPuzzle(){
+ rollDays();
+ if(state.puzzleDay===comboDay()){
+  toast(T("Ключ за сегодня уже получен. Новый — после 15:00 МСК.","Today's key is already claimed. Next one after 15:00 Moscow time."));
+  return;
+ }
+ puzzle={deadline:now()+60000,selected:"key",finished:false,won:false,moves:0,vehicles:[
+  {id:"key",x:0,y:2,len:2,axis:"h",kind:"key"},
+  {id:"a",x:2,y:1,len:2,axis:"v",kind:"red"},
+  {id:"b",x:4,y:0,len:3,axis:"v",kind:"green"},
+  {id:"c",x:0,y:4,len:2,axis:"h",kind:"green"},
+  {id:"d",x:3,y:4,len:2,axis:"h",kind:"red"},
+  {id:"e",x:5,y:0,len:2,axis:"v",kind:"red"},
+  {id:"f",x:0,y:0,len:2,axis:"h",kind:"green"}
+ ]};
+ openModal("puzzle");
+}
+function puzzleHTML(){
+ if(!puzzle)return "";
+ if(puzzle.finished)return `
+ <div style="text-align:center;font-size:70px;padding:20px">${puzzle.won?"🔑":"⌛"}</div>
+ <h3 style="text-align:center">${puzzle.won?T("Путь открыт!","Path cleared!"):T("Попытка завершена","Attempt finished")}</h3>
+ <p class="description" style="text-align:center">${puzzle.won?
+  T("Получен 1 игровой ключ.","You earned 1 game key."):
+  T("Попробуй ещё раз. Блоки двигаются только вдоль своей оси.","Try again. Blocks move only along their axis.")}</p>
+ <button class="btn wide" data-action="${puzzle.won?"close":"puzzle-retry"}">
+  ${puzzle.won?T("Отлично","Great"):T("Повторить","Try again")}
+ </button>`;
+ return `
+ <div class="row"><strong class="gold">⏳ <span id="puzzle-timer"></span></strong><span class="small">${T("Ходов","Moves")}: ${puzzle.moves}</span></div>
+ <p class="small">${T("Выбери блок и двигай стрелками. Проведи золотой ключ к выходу справа. Работает клавиатура.","Select a block and move it with arrows. Guide the gold key to the right exit. Keyboard arrows also work.")}</p>
+ <div class="puzzle-board">
+  ${Array.from({length:36},(_,i)=>`<div class="puzzle-cell" style="--r:${Math.floor(i/6)+1};--c:${i%6+1}"></div>`).join("")}
+  ${puzzle.vehicles.map(v=>`
+   <button class="vehicle ${v.kind==="red"?"red":v.kind==="key"?"key":""} ${puzzle.selected===v.id?"selected":""}"
+    data-action="puzzle-select" data-id="${v.id}"
+    aria-label="${v.id==="key"?T("Ключ","Key"):T("Блок ","Block ")+v.id}"
+    style="grid-column:${v.x+1}/span ${v.axis==="h"?v.len:1};grid-row:${v.y+1}/span ${v.axis==="v"?v.len:1}">
+    ${v.id==="key"?"🔑":v.axis==="h"?"↔":"↕"}
+   </button>`).join("")}
+  <div class="puzzle-exit">➜</div>
+ </div>
+ <div class="arrows">${[["left","←"],["up","↑"],["down","↓"],["right","→"]].map(([id,label])=>`
+  <button class="btn secondary" data-action="puzzle-move" data-id="${id}" aria-label="${id}">${label}</button>`).join("")}</div>
+ <p class="small" style="margin-top:13px">${T("60 секунд. Один ключ за игровой день. Закрытие окна завершает попытку.","60 seconds. One key per game day. Closing the dialog ends the attempt.")}</p>`;
+}
+function canPlace(vehicle,x,y){
+ if(x<0||y<0||x+(vehicle.axis==="h"?vehicle.len:1)>6||
+  y+(vehicle.axis==="v"?vehicle.len:1)>6)return false;
+ for(let i=0;i<vehicle.len;i++){
+  const cx=x+(vehicle.axis==="h"?i:0),cy=y+(vehicle.axis==="v"?i:0);
+  for(const other of puzzle.vehicles){
+   if(other.id===vehicle.id)continue;
+   for(let j=0;j<other.len;j++){
+    if(cx===other.x+(other.axis==="h"?j:0)&&
+     cy===other.y+(other.axis==="v"?j:0))return false;
+   }
+  }
+ }
+ return true;
+}
+function movePuzzle(direction){
+ if(!active||!puzzle||puzzle.finished)return;
+ if(now()>=puzzle.deadline){endPuzzle(false);return}
+ const vehicle=puzzle.vehicles.find(v=>v.id===puzzle.selected);
+ const moves={left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]};
+ if(!vehicle||!moves[direction])return;
+ const [dx,dy]=moves[direction];
+ if((vehicle.axis==="h"&&dy)||(vehicle.axis==="v"&&dx))return;
+ if(!canPlace(vehicle,vehicle.x+dx,vehicle.y+dy)){sound("error");return}
+ vehicle.x+=dx;vehicle.y+=dy;puzzle.moves++;sound();
+ if(vehicle.id==="key"&&vehicle.x+vehicle.len===6){endPuzzle(true);return}
+ renderModal();
+}
+function endPuzzle(won){
+ if(!puzzle||puzzle.finished)return;
+ puzzle.finished=true;puzzle.won=won;
+ if(won&&state.puzzleDay!==comboDay()){
+  state.keys++;state.puzzleDay=comboDay();save();sound("reward");haptic();
+ }else if(!won)sound("error");
+ if(modalName==="puzzle")renderModal();
+}
+
+function buyCard(id){
+ settle(false);rollDays();
+ const c=CARD_BY_ID[id];
+ if(!c)return;
+ const reason=lockReason(c);
+ if(reason){toast(reason);return}
+ if((state.cards[id]||0)>=100)return;
+ if(!spend(cardPrice(c))){
+  toast(T("Недостаточно монет.","Not enough coins."));sound("error");return;
+ }
+ state.cards[id]=(state.cards[id]||0)+1;
+ recalculateProfit();
+ const found=dailyCombo().includes(id)&&!state.comboFound.includes(id);
+ if(found)state.comboFound.push(id);
+ /* Уровень и новый доход сохраняются сразу после покупки. */
+ writeSave();sound("buy");render();
+ if(modalName)renderModal();
+ if(saveOK)toast(found?T("Найдено направление комбо!","Combo business found!"):
+  T("Бизнес улучшен и сохранён.","Business upgraded and saved."));
+}
+function claimCombo(){
+ settle(false);rollDays();
+ if(state.comboClaimed||state.comboFound.length!==3)return;
+ state.comboClaimed=true;credit(5000000);save();sound("reward");
+ render();if(modalName)renderModal();
+ toast(T("Комбо собрано! +5 000 000","Combo complete! +5,000,000"));
+}
+function buyBoost(type){
+ if(!["tap","energy"].includes(type))return;
+ settle(false);
+ const level=type==="tap"?state.tapLevel:state.energyLevel;
+ if(level>=100)return;
+ if(!spend(boostPrice(type))){
+  sound("error");toast(T("Недостаточно монет.","Not enough coins."));return;
+ }
+ if(type==="tap")state.tapLevel++;
+ else{
+  state.energyLevel++;state.energy=Math.min(maxEnergy(),state.energy+ENERGY_STEP);
+ }
+ save();sound("buy");render();renderModal();
+}
+function useFullEnergy(){
+ settle(false);rollDays();
+ if(state.boostUsed>=6||now()-state.boostLast<3600000)return;
+ if(state.energy>=maxEnergy()-.1){
+  toast(T("Энергия уже полная.","Energy is already full."));return;
+ }
+ state.energy=maxEnergy();state.boostUsed++;state.boostLast=now();
+ save();sound("reward");render();renderModal();
+}
+function claimCheckin(){
+ settle(false);
+ const info=checkinInfo();
+ if(info.claimed)return;
+ const reward=CHECKIN[info.next-1];
+ state.checkinStreak=info.streak+1;state.checkinLast=info.today;
+ credit(reward);save();sound("reward");render();
+ toast(T("Ежедневная награда: +","Daily reward: +")+fmt(reward));
+}
+function checkRank(){
+ const rank=rankIndex();
+ if(rank===lastRenderedRank)return;
+ const increased=rank>lastRenderedRank;
+ lastRenderedRank=rank;
+ if(increased){toast(T("Новая лига: ","New league: ")+RANKS[rank][0]);sound("reward")}
+}
+function downloadBlob(blob,name){
+ const url=URL.createObjectURL(blob),link=document.createElement("a");
+ link.href=url;link.download=name;document.body.appendChild(link);
+ link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+function exportSave(){
+ save();
+ const data={
+  ...state,hourlyProfit:profitPerHour(),
+  assets:{...assets,photo:assets.photo||defaultPhotoData}
+ };
+ downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),
+  "hamster-empire-save.json");
+}
+async function exportHTML(){
+ const epoch=dataEpoch;
+ try{
+  const photo=await embedDefaultPhoto();
+  if(epoch!==dataEpoch)return;
+  const copy=document.documentElement.cloneNode(true);
+  for(const id of ["header","main","nav","modal-root","toast-root"]){
+   copy.querySelector("#"+id).innerHTML="";
+  }
+  copy.querySelector("body").style.overflow="";
+  copy.querySelectorAll(".float-number").forEach(n=>n.remove());
+  copy.querySelector("#embedded-assets").textContent=JSON.stringify({photo,avatar:""});
+  downloadBlob(new Blob(["<!DOCTYPE html>\n"+copy.outerHTML],
+   {type:"text/html;charset=utf-8"}),"hamster-empire-with-photo.html");
+  toast(T("HTML с фото скачан. Для переноса прогресса используй JSON.","HTML with photo downloaded. Use JSON to transfer progress."));
+ }catch(error){
+  if(epoch===dataEpoch)toast(error.message||T("Не удалось встроить фото.","Could not embed photo."));
+ }
+}
+async function importSave(){
+ const file=$("#import-file")?.files?.[0],epoch=dataEpoch;
+ if(!file){toast(T("Выбери JSON-файл.","Choose a JSON file."));return}
+ if(file.size>12*1024*1024){toast(T("Максимум 12 МБ.","Maximum 12 MB."));return}
+ try{
+  const data=JSON.parse(await file.text());
+  if(epoch!==dataEpoch)return;
+  if(!validSave(data)||![1,2,3,4,5].includes(Number(data.version))){
+   throw new Error("Invalid save");
+  }
+  dataEpoch++;
+  state=normalizeState(data);state.lastSeen=now();
+  if(data.assets)assets=normalizeAssets(data.assets);
+  recalculateProfit();settleClock=now();displayedBalance=state.balance;
+  lastRenderedRank=rankIndex();cipherMode=false;clearCipher();puzzle=null;tab="home";
+  if(state.avatar==="custom"&&!assets.avatar)state.avatar="photo";
+  rollDays();saveAssets();writeSave();closeModal();render();
+  if(saveOK)toast(T("Прогресс импортирован. Доход восстановлен.","Progress imported. Profit restored."));
+ }catch{
+  if(epoch===dataEpoch)toast(T("Не удалось прочитать корректное сохранение.","Could not read a valid save."));
+ }
+}
+
+document.addEventListener("click",event=>{
+ const target=event.target;
+ if(!(target instanceof Element))return;
+ if(target.id==="overlay"){closeModal();return}
+ const button=target.closest("[data-action]");
+ if(!button||button.disabled||!active)return;
+ const action=button.dataset.action,id=button.dataset.id;
+ switch(action){
+  case "tab":
+   if(!["home","mine","earn","empire"].includes(id))break;
+   if(modalName)closeModal();
+   if(id!=="home"){cipherMode=false;clearCipher()}
+   tab=id;render();window.scrollTo({top:0,behavior:"auto"});break;
+  case "category":
+   if(id!=="all"&&!CATEGORIES.some(c=>c.id===id))break;
+   mineCategory=id;render();break;
+  case "settings":openModal("settings");break;
+  case "photo":openModal("photo");break;
+  case "photo-upload":uploadImage(false);break;
+  case "photo-remove":
+   assets.photo="";saveAssets();save();render();renderModal();break;
+  case "avatar":openModal("avatar");break;
+  case "avatar-upload":uploadImage(true);break;
+  case "avatar-select":
+   if(![...AVATARS,"photo","custom"].includes(id)||(id==="custom"&&!assets.avatar))break;
+   state.avatar=id;save();renderHeader();updateHUD();renderModal();break;
+  case "exchange":openModal("exchange");break;
+  case "exchange-select":
+   if(!EXCHANGES.includes(id))break;
+   state.exchange=id;save();closeModal();render();break;
+  case "language":
+   if(!["ru","en"].includes(id))break;
+   state.language=id;save();render();renderModal();break;
+  case "theme":
+   if(!["dark","light"].includes(id))break;
+   state.theme=id;save();render();renderModal();break;
+  case "sound":
+   state.sound=!state.sound;save();if(state.sound)sound("buy");renderModal();break;
+  case "nickname-save":{
+   const name=($("#nickname-input")?.value||"").trim().slice(0,24);
+   if(!name){toast(T("Имя не может быть пустым.","Name cannot be empty."));break}
+   state.nickname=name;save();renderHeader();updateHUD();
+   if(saveOK)toast(T("Имя сохранено.","Name saved."));
+   break;
+  }
+  case "close":closeModal();break;
+  case "boosts":rollDays();openModal("boosts");break;
+  case "boost-buy":buyBoost(id);break;
+  case "full-energy":useFullEnergy();break;
+  case "combo":rollDays();openModal("combo");break;
+  case "combo-claim":claimCombo();break;
+  case "card":if(CARD_BY_ID[id])openModal("card",id);break;
+  case "card-buy":buyCard(id);break;
+  case "checkin":claimCheckin();break;
+  case "promo-activate":activatePromo();break;
+  case "cipher-toggle":
+   if(modalName)closeModal();
+   toggleCipher();break;
+  case "cipher-clear":clearCipher();updateCipherUI();break;
+  case "cipher-help":openModal("cipher-help");break;
+  case "stat-tap":{
+   const t=performance.now();
+   statTapTimes=statTapTimes.filter(value=>t-value<1200);
+   statTapTimes.push(t);
+   if(statTapTimes.length>=3){statTapTimes=[];toggleCipher()}
+   break;
+  }
+  case "puzzle":
+  case "puzzle-retry":startPuzzle();break;
+  case "puzzle-select":
+   if(puzzle&&!puzzle.finished&&puzzle.vehicles.some(v=>v.id===id)){
+    puzzle.selected=id;renderModal();
+   }
+   break;
+  case "puzzle-move":movePuzzle(id);break;
+  case "offline-claim":{
+   settle(false);
+   const reward=state.pendingOffline;
+   state.pendingOffline=0;
+   credit(reward);save();sound("reward");checkRank();
+   closeModal();render();
+   if(reward>=1)toast(T("Офлайн-доход получен: +","Offline earnings claimed: +")+fmt(reward));
+   break;
+  }
+  case "save-now":
+   if(save())toast(T("Прогресс и доход сохранены.","Progress and profit saved."));
+   updateHUD();break;
+  case "export":exportSave();break;
+  case "export-html":exportHTML();break;
+  case "import":openModal("import");break;
+  case "import-apply":importSave();break;
+  case "reset-confirm":openModal("reset");break;
+  case "reset":{
+   dataEpoch++;
+   const preferences={
+    language:state.language,theme:state.theme,sound:state.sound,
+    nickname:state.nickname,exchange:state.exchange,avatar:state.avatar
+   };
+   state=Object.assign(newState(),preferences);
+   recalculateProfit();displayedBalance=0;settleClock=now();
+   lastFrame=performance.now();lastRenderedRank=0;lastAcceptedTap=-Infinity;
+   cipherMode=false;clearCipher();statTapTimes=[];puzzle=null;tab="home";
+   mineCategory="markets";mineSearch="";mineSort="default";
+   if(state.avatar==="custom"&&!assets.avatar)state.avatar="photo";
+   writeSave();closeModal();render();
+   if(saveOK)toast(T("Прогресс сброшен. Изображения сохранены.","Progress reset. Images preserved."));
+   break;
+  }
+ }
+});
+
+document.addEventListener("input",event=>{
+ const input=event.target;
+ if(input instanceof HTMLInputElement&&input.id==="mine-search"){
+  mineSearch=input.value;renderBusinessList();
+ }
+});
+document.addEventListener("change",event=>{
+ const input=event.target;
+ if(input instanceof HTMLSelectElement&&input.id==="mine-sort"){
+  if(!["default","price","profit","roi"].includes(input.value))return;
+  mineSort=input.value;renderBusinessList();
+ }
+});
+document.addEventListener("keydown",event=>{
+ if(!active)return;
+ if(event.key==="Escape"&&modalName){event.preventDefault();closeModal();return}
+ if(event.key==="Tab"&&modalName){
+  const modal=$(".modal");
+  if(!modal)return;
+  const focusable=[...modal.querySelectorAll(
+   'button:not(:disabled),input:not(:disabled),select:not(:disabled),'+
+   'textarea:not(:disabled),a[href],summary,[tabindex="0"]'
+  )].filter(element=>element.getClientRects().length>0);
+  if(!focusable.length){event.preventDefault();return}
+  const first=focusable[0],last=focusable[focusable.length-1];
+  const focused=document.activeElement;
+  if(event.shiftKey&&(focused===first||!modal.contains(focused))){
+   event.preventDefault();last.focus();
+  }else if(!event.shiftKey&&(focused===last||!modal.contains(focused))){
+   event.preventDefault();first.focus();
+  }
+  return;
+ }
+ const target=event.target;
+ const editing=target instanceof Element&&(
+  target.matches("input,textarea,select")||target.isContentEditable
+ );
+ if(event.key==="Enter"&&editing){
+  if(target.id==="promo-input"){event.preventDefault();activatePromo();return}
+  if(modalName==="settings"&&target.id==="nickname-input"){
+   event.preventDefault();$('[data-action="nickname-save"]')?.click();return;
+  }
+ }
+ if(editing)return;
+ if(modalName==="puzzle"&&puzzle&&!puzzle.finished){
+  const direction={
+   ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down"
+  }[event.key];
+  if(direction){event.preventDefault();movePuzzle(direction)}
+ }
+});
+
+function suspendGame(){
+ if(active){settle(false);active=false}
+ activePointers.clear();clearTimeout(cipherTimer);cipherSymbols="";updateCipherUI();
+ const hero=$("#hero");
+ if(hero)hero.style.transform="";
+ writeSave();
+}
+function resumeGame(){
+ if(active||document.hidden)return;
+ settle(true);const changed=rollDays();
+ active=true;lastFrame=performance.now();lastHUD=0;
+ if(changed){render();if(modalName)renderModal()}
+ else updateHUD();
+ if(puzzle&&!puzzle.finished&&now()>=puzzle.deadline)endPuzzle(false);
+ writeSave();
+ if(state.pendingOffline>=1&&!modalName)openModal("offline");
+ else if(modalName==="offline")renderModal();
+}
+document.addEventListener("visibilitychange",()=>{
+ if(document.hidden)suspendGame();
+ else resumeGame();
+});
+window.addEventListener("pagehide",suspendGame);
+window.addEventListener("pageshow",()=>{if(!document.hidden)resumeGame()});
+window.addEventListener("beforeunload",()=>{
+ if(active)settle(false);
+ writeSave();
+});
+
+function animationFrame(timestamp){
+ requestAnimationFrame(animationFrame);
+ const dt=clamp((timestamp-lastFrame)/1000,0,.1);
+ lastFrame=timestamp;
+ if(!active||document.hidden)return;
+
+ const balanceElement=$("#balance-number");
+ if(balanceElement){
+  const difference=state.balance-displayedBalance;
+  if(Math.abs(difference)<.5)displayedBalance=state.balance;
+  else displayedBalance+=difference*(1-Math.exp(-dt*14));
+  const text=fmt(displayedBalance);
+  if(balanceElement.textContent!==text)balanceElement.textContent=text;
+ }
+ if(timestamp-lastHUD<200)return;
+ lastHUD=timestamp;settle(false);
+ if(rollDays()){
+  writeSave();render();if(modalName)renderModal();
+ }
+ if(puzzle&&!puzzle.finished&&now()>=puzzle.deadline)endPuzzle(false);
+ checkRank();updateHUD();
+}
+
+/* Сохраняются весь прогресс и уровни бизнесов, а не только баланс. */
+setInterval(()=>{
+ if(!active||document.hidden)return;
+ settle(false);writeSave();updateHUD();
+},2000);
+
+function validateConfiguration(){
+ if(CARDS.length!==60)console.error("Ожидалось 60 бизнес-направлений.");
+ if(new Set(CARDS.map(c=>c.id)).size!==CARDS.length){
+  console.error("Повторяющиеся идентификаторы бизнесов.");
+ }
+ for(const card of CARDS){
+  if(card.dep&&!CARD_BY_ID[card.dep[0]]){
+   console.error("Не найдена зависимость:",card.id,card.dep[0]);
+  }
+ }
+}
+
+/* Автоматический запуск без регистрации. */
+validateConfiguration();
+loadProgress();
+if(state.avatar==="custom"&&!assets.avatar)state.avatar="photo";
+recalculateProfit();
+displayedBalance=state.balance;
+settleClock=state.lastSeen;
+settle(true);
+rollDays();
+active=!document.hidden;
+lastRenderedRank=rankIndex();
+writeSave();
+saveAssets();
+render();
+requestAnimationFrame(animationFrame);
+
+setTimeout(()=>{
+ if(migrationMessage){
+  toast(T(
+   "Старый прогресс перенесён. Регистрация больше не нужна.",
+   "Old progress transferred. Registration is no longer needed."
+  ));
+ }
+ if(active&&state.pendingOffline>=1&&!modalName)openModal("offline");
+},400);
+</script>
+</body>
+</html>
